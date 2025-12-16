@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
-import * as Haptics from 'expo-haptics';
 
 import { ScreenWrapper } from '../components/ScreenWrapper';
 import { CircularProgress } from '../components/CircularProgress';
@@ -36,11 +35,6 @@ export const HomeScreen = ({ navigation }) => {
     { id: '1', title: 'Push-ups', details: '3 sets x 15 reps', time: '08:30 AM' },
     { id: '2', title: 'Morning Run', details: '5.2 km in 28 mins', time: '07:00 AM' },
   ]);
-
-  const handleAddPress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    navigation.navigate('Add');
-  };
 
   const getGreeting = () => {
     const hours = new Date().getHours();
@@ -122,15 +116,6 @@ export const HomeScreen = ({ navigation }) => {
         {/* Spacer for FAB */}
         <View style={{ height: 80 }} />
       </ScrollView>
-
-      {/* FAB */}
-      <TouchableOpacity 
-        style={styles.fab} 
-        onPress={handleAddPress}
-        activeOpacity={0.8}
-      >
-        <Ionicons name="add" size={32} color={COLORS.background} />
-      </TouchableOpacity>
     </ScreenWrapper>
   );
 };
@@ -272,21 +257,5 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     color: COLORS.textSecondary,
-  },
-  fab: {
-    position: 'absolute',
-    bottom: SPACING.xl,
-    right: SPACING.xl,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: COLORS.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
   },
 });

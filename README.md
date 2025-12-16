@@ -24,20 +24,20 @@ A premium, professional fitness tracking mobile application built with React Nat
 
 ## 🚧 Remaining Roadmap
 
-### **Phase 1: Workout Logging (Next Priority)**
-- [ ] **Add Workout Screen:**
-    - [ ] Exercise selector with search.
-    - [ ] Dynamic form fields based on exercise type (Strength vs. Cardio).
-    - [ ] Date/Time picker.
-    - [ ] "Save" functionality connected to `useWorkouts`.
-- [ ] **Data Persistence:**
-    - [ ] fully integrate `AsyncStorage` to persist workouts between app restarts.
+### **Phase 1: Workout Logging (Completed)**
+- [x] **Add Workout Screen:**
+    - [x] Exercise selector with search & suggestions.
+    - [x] Dynamic form fields (Strength: Sets/Reps/Weight vs. Cardio: Dist/Duration).
+    - [x] "Save" functionality connected to `useWorkouts`.
+- [x] **Data Persistence:**
+    - [x] Fully integrated `AsyncStorage` to persist workouts between app restarts.
 
-### **Phase 2: History & Management**
-- [ ] **History Screen:**
-    - [ ] Group workouts by date.
-    - [ ] Swipe-to-delete animations.
-    - [ ] "Pull to refresh" interaction.
+### **Phase 2: History & Management (In Progress)**
+- [x] **History Screen:**
+    - [x] List view of all workouts.
+    - [x] Delete functionality.
+    - [ ] Group workouts by date (refinement).
+    - [ ] Swipe-to-delete animations (refinement).
 - [ ] **Home Screen Integration:**
     - [ ] Replace dummy data with real live data from `useWorkouts`.
 
