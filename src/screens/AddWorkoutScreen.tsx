@@ -8,27 +8,29 @@ import {
   ScrollView, 
   KeyboardAvoidingView, 
   Platform,
-  FlatList,
-  Modal
+  Modal,
+  ActivityIndicator
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { ScreenWrapper } from '../components/ScreenWrapper';
+import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, FONTS, SPACING, SIZES } from '../constants/theme';
 import { useWorkouts } from '../hooks/useWorkouts';
 import { ExerciseType, Workout } from '../types';
 import * as Haptics from 'expo-haptics';
+import { GlassCard } from '../components/GlassCard';
 
 const COMMON_EXERCISES = [
-  { name: 'Push-ups', type: 'strength' },
-  { name: 'Pull-ups', type: 'strength' },
-  { name: 'Squats', type: 'strength' },
-  { name: 'Bench Press', type: 'strength' },
-  { name: 'Deadlift', type: 'strength' },
-  { name: 'Running', type: 'cardio' },
-  { name: 'Cycling', type: 'cardio' },
-  { name: 'Swimming', type: 'cardio' },
-  { name: 'Plank', type: 'time' },
-  { name: 'Jump Rope', type: 'cardio' },
+  { name: 'Push-ups', type: 'strength', icon: '💪' },
+  { name: 'Pull-ups', type: 'strength', icon: '🧗' },
+  { name: 'Squats', type: 'strength', icon: '🦵' },
+  { name: 'Bench Press', type: 'strength', icon: '🏋️' },
+  { name: 'Deadlift', type: 'strength', icon: '🏗️' },
+  { name: 'Running', type: 'cardio', icon: '🏃' },
+  { name: 'Cycling', type: 'cardio', icon: '🚴' },
+  { name: 'Swimming', type: 'cardio', icon: '🏊' },
+  { name: 'Plank', type: 'time', icon: '🪵' },
+  { name: 'Jump Rope', type: 'cardio', icon: '🪢' },
 ] as const;
 
 export const AddWorkoutScreen = ({ navigation }: any) => {
@@ -37,6 +39,7 @@ export const AddWorkoutScreen = ({ navigation }: any) => {
   const [exerciseName, setExerciseName] = useState('');
   const [exerciseType, setExerciseType] = useState<ExerciseType>('strength');
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [loading, setLoading] = useState(false);
   
   // Strength fields
   const [sets, setSets] = useState('');
@@ -57,6 +60,7 @@ export const AddWorkoutScreen = ({ navigation }: any) => {
   const handleSave = async () => {
     if (!exerciseName) return;
 
+    setLoading(true);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
     const newWorkout: Workout = {
@@ -75,17 +79,21 @@ export const AddWorkoutScreen = ({ navigation }: any) => {
       newWorkout.duration = duration ? parseInt(duration) : 0;
     }
 
-    await addWorkout(newWorkout);
-    
-    // Reset form
-    setExerciseName('');
-    setSets('');
-    setReps('');
-    setWeight('');
-    setDistance('');
-    setDuration('');
-    
-    navigation.navigate('Home');
+    // Simulate network delay for effect
+    setTimeout(async () => {
+      await addWorkout(newWorkout);
+      setLoading(false);
+      
+      // Reset form
+      setExerciseName('');
+      setSets('');
+      setReps('');
+      setWeight('');
+      setDistance('');
+      setDuration('');
+      
+      navigation.goBack();
+    }, 800);
   };
 
   const filteredExercises = COMMON_EXERCISES.filter(ex => 
@@ -93,22 +101,29 @@ export const AddWorkoutScreen = ({ navigation }: any) => {
   );
 
   return (
-    <ScreenWrapper>
+    <View style={styles.container}>
+      <BlurView intensity={80} tint="dark" style={StyleSheet.absoluteFill} />
+      
       <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
       >
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeButton}>
+            <Ionicons name="close" size={24} color={COLORS.text} />
+          </TouchableOpacity>
           <Text style={styles.title}>Log Workout</Text>
+          <View style={{ width: 24 }} /> 
+        </View>
 
+        <ScrollView contentContainerStyle={styles.scrollContent}>
           {/* Exercise Name Input */}
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Exercise Name</Text>
-            <View style={styles.inputContainer}>
+            <GlassCard style={styles.inputCard}>
               <Ionicons name="search" size={20} color={COLORS.textSecondary} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
-                placeholder="Search or enter exercise..."
+                placeholder="Search exercises..."
                 placeholderTextColor={COLORS.textSecondary}
                 value={exerciseName}
                 onChangeText={(text) => {
@@ -117,254 +132,264 @@ export const AddWorkoutScreen = ({ navigation }: any) => {
                 }}
                 onFocus={() => setShowSuggestions(true)}
               />
-            </View>
+            </GlassCard>
             
             {/* Suggestions List */}
             {showSuggestions && exerciseName.length > 0 && (
-              <View style={styles.suggestionsContainer}>
+              <GlassCard style={styles.suggestionsContainer}>
                 {filteredExercises.map((ex, index) => (
                   <TouchableOpacity 
                     key={index} 
                     style={styles.suggestionItem}
                     onPress={() => handleExerciseSelect(ex.name, ex.type)}
                   >
-                    <Text style={styles.suggestionText}>{ex.name}</Text>
-                    <Text style={styles.suggestionType}>{ex.type}</Text>
+                    <Text style={styles.suggestionIcon}>{ex.icon}</Text>
+                    <View style={styles.suggestionTextContainer}>
+                      <Text style={styles.suggestionText}>{ex.name}</Text>
+                      <Text style={styles.suggestionType}>{ex.type}</Text>
+                    </View>
                   </TouchableOpacity>
                 ))}
-              </View>
+              </GlassCard>
             )}
           </View>
 
-          {/* Type Selector */}
-          <View style={styles.typeSelector}>
-            {['strength', 'cardio'].map((type) => (
-              <TouchableOpacity
-                key={type}
-                style={[
-                  styles.typeButton,
-                  exerciseType === type && styles.typeButtonActive
-                ]}
-                onPress={() => {
-                  setExerciseType(type as ExerciseType);
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }}
-              >
-                <Text style={[
-                  styles.typeButtonText,
-                  exerciseType === type && styles.typeButtonTextActive
-                ]}>
-                  {type.charAt(0).toUpperCase() + type.slice(1)}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+          {/* Type Selector - Optional/Auto-detected usually, but kept for manual override */}
+          {/* Hidden if selected from list to keep clean, or show small tags */}
 
           {/* Dynamic Form Fields */}
           {exerciseType === 'strength' ? (
-            <View style={styles.formRow}>
-              <View style={styles.halfInput}>
-                <Text style={styles.label}>Sets</Text>
-                <TextInput
-                  style={styles.input}
-                  keyboardType="number-pad"
-                  placeholder="0"
-                  placeholderTextColor={COLORS.textSecondary}
-                  value={sets}
-                  onChangeText={setSets}
-                />
+            <View style={styles.formGrid}>
+              <View style={styles.gridItem}>
+                <Text style={styles.label}>SETS</Text>
+                <GlassCard style={styles.numberInputCard}>
+                  <TextInput
+                    style={styles.numberInput}
+                    keyboardType="number-pad"
+                    placeholder="0"
+                    placeholderTextColor={COLORS.textTertiary}
+                    value={sets}
+                    onChangeText={setSets}
+                  />
+                </GlassCard>
               </View>
-              <View style={styles.halfInput}>
-                <Text style={styles.label}>Reps</Text>
-                <TextInput
-                  style={styles.input}
-                  keyboardType="number-pad"
-                  placeholder="0"
-                  placeholderTextColor={COLORS.textSecondary}
-                  value={reps}
-                  onChangeText={setReps}
-                />
+              <View style={styles.gridItem}>
+                <Text style={styles.label}>REPS</Text>
+                <GlassCard style={styles.numberInputCard}>
+                  <TextInput
+                    style={styles.numberInput}
+                    keyboardType="number-pad"
+                    placeholder="0"
+                    placeholderTextColor={COLORS.textTertiary}
+                    value={reps}
+                    onChangeText={setReps}
+                  />
+                </GlassCard>
               </View>
-              <View style={styles.fullInput}>
-                <Text style={styles.label}>Weight (kg)</Text>
-                <TextInput
-                  style={styles.input}
-                  keyboardType="numeric"
-                  placeholder="0.0"
-                  placeholderTextColor={COLORS.textSecondary}
-                  value={weight}
-                  onChangeText={setWeight}
-                />
+              <View style={[styles.gridItem, { width: '100%', marginTop: 16 }]}>
+                <Text style={styles.label}>WEIGHT (KG)</Text>
+                <GlassCard style={styles.numberInputCard}>
+                  <TextInput
+                    style={styles.numberInput}
+                    keyboardType="numeric"
+                    placeholder="0.0"
+                    placeholderTextColor={COLORS.textTertiary}
+                    value={weight}
+                    onChangeText={setWeight}
+                  />
+                </GlassCard>
               </View>
             </View>
           ) : (
-            <View style={styles.formRow}>
-              <View style={styles.halfInput}>
-                <Text style={styles.label}>Distance (km)</Text>
-                <TextInput
-                  style={styles.input}
-                  keyboardType="numeric"
-                  placeholder="0.0"
-                  placeholderTextColor={COLORS.textSecondary}
-                  value={distance}
-                  onChangeText={setDistance}
-                />
+            <View style={styles.formGrid}>
+              <View style={[styles.gridItem, { width: '100%' }]}>
+                <Text style={styles.label}>DISTANCE (KM)</Text>
+                <GlassCard style={styles.numberInputCard}>
+                  <TextInput
+                    style={styles.numberInput}
+                    keyboardType="numeric"
+                    placeholder="0.0"
+                    placeholderTextColor={COLORS.textTertiary}
+                    value={distance}
+                    onChangeText={setDistance}
+                  />
+                </GlassCard>
               </View>
-              <View style={styles.halfInput}>
-                <Text style={styles.label}>Duration (min)</Text>
-                <TextInput
-                  style={styles.input}
-                  keyboardType="number-pad"
-                  placeholder="0"
-                  placeholderTextColor={COLORS.textSecondary}
-                  value={duration}
-                  onChangeText={setDuration}
-                />
+              <View style={[styles.gridItem, { width: '100%', marginTop: 16 }]}>
+                <Text style={styles.label}>DURATION (MIN)</Text>
+                <GlassCard style={styles.numberInputCard}>
+                  <TextInput
+                    style={styles.numberInput}
+                    keyboardType="number-pad"
+                    placeholder="0"
+                    placeholderTextColor={COLORS.textTertiary}
+                    value={duration}
+                    onChangeText={setDuration}
+                  />
+                </GlassCard>
               </View>
             </View>
           )}
 
-          <TouchableOpacity 
-            style={[styles.saveButton, !exerciseName && styles.saveButtonDisabled]}
-            onPress={handleSave}
-            disabled={!exerciseName}
-          >
-            <Text style={styles.saveButtonText}>Save Workout</Text>
-          </TouchableOpacity>
-
         </ScrollView>
+
+        <View style={styles.footer}>
+          <TouchableOpacity 
+            style={[styles.saveButtonContainer, !exerciseName && { opacity: 0.5 }]}
+            onPress={handleSave}
+            disabled={!exerciseName || loading}
+          >
+            <LinearGradient
+              colors={[COLORS.primary, COLORS.success]}
+              start={{x: 0, y: 0}}
+              end={{x: 1, y: 0}}
+              style={styles.saveButton}
+            >
+              {loading ? (
+                <ActivityIndicator color="white" />
+              ) : (
+                <Text style={styles.saveButtonText}>Save Workout</Text>
+              )}
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
       </KeyboardAvoidingView>
-    </ScreenWrapper>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  scrollContent: {
-    padding: SPACING.l,
-    paddingBottom: 100,
+  container: {
+    flex: 1,
+    backgroundColor: 'transparent',
   },
-  title: {
-    fontSize: 28,
-    color: COLORS.text,
-    marginBottom: SPACING.xl,
-    ...FONTS.bold,
-  },
-  inputGroup: {
-    marginBottom: SPACING.l,
-    zIndex: 10,
-  },
-  label: {
-    color: COLORS.textSecondary,
-    marginBottom: SPACING.s,
-    fontSize: 14,
-    ...FONTS.medium,
-  },
-  inputContainer: {
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.card,
-    borderRadius: SIZES.radius,
+    justifyContent: 'space-between',
+    paddingTop: 60,
+    paddingHorizontal: SPACING.l,
+    paddingBottom: SPACING.m,
+  },
+  closeButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: COLORS.glassMorphism,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  title: {
+    ...FONTS.title2,
+    color: COLORS.text,
+  },
+  scrollContent: {
+    paddingHorizontal: SPACING.l,
+    paddingBottom: 100,
+  },
+  inputGroup: {
+    marginBottom: SPACING.xl,
+    zIndex: 10,
+  },
+  inputCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: SPACING.m,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    height: 50,
+    height: 56,
+    borderRadius: 16,
   },
   inputIcon: {
     marginRight: SPACING.s,
   },
   input: {
     flex: 1,
+    ...FONTS.body,
     color: COLORS.text,
-    fontSize: 16,
     height: '100%',
-    ...FONTS.regular,
   },
   suggestionsContainer: {
     position: 'absolute',
-    top: 80,
+    top: 64,
     left: 0,
     right: 0,
-    backgroundColor: COLORS.card,
-    borderRadius: SIZES.radius,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    maxHeight: 200,
+    maxHeight: 300,
     zIndex: 1000,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4.65,
-    elevation: 8,
+    padding: 0,
   },
   suggestionItem: {
     padding: SPACING.m,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  suggestionIcon: {
+    fontSize: 24,
+    marginRight: SPACING.m,
+  },
+  suggestionTextContainer: {
+    flex: 1,
   },
   suggestionText: {
+    ...FONTS.body,
+    fontWeight: '600',
     color: COLORS.text,
-    fontSize: 16,
   },
   suggestionType: {
+    ...FONTS.caption1,
     color: COLORS.textSecondary,
-    fontSize: 12,
     textTransform: 'capitalize',
   },
-  typeSelector: {
-    flexDirection: 'row',
-    marginBottom: SPACING.xl,
-    backgroundColor: COLORS.card,
-    padding: 4,
-    borderRadius: SIZES.radius,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  typeButton: {
-    flex: 1,
-    paddingVertical: 10,
-    alignItems: 'center',
-    borderRadius: SIZES.radius - 4,
-  },
-  typeButtonActive: {
-    backgroundColor: COLORS.primary,
-  },
-  typeButtonText: {
-    color: COLORS.textSecondary,
-    ...FONTS.medium,
-  },
-  typeButtonTextActive: {
-    color: COLORS.background,
-    ...FONTS.bold,
-  },
-  formRow: {
+  formGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
-  halfInput: {
+  gridItem: {
     width: '48%',
-    marginBottom: SPACING.l,
   },
-  fullInput: {
+  label: {
+    ...FONTS.caption2,
+    color: COLORS.textSecondary,
+    marginBottom: SPACING.s,
+    paddingLeft: 4,
+  },
+  numberInputCard: {
+    height: 72,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 16,
+  },
+  numberInput: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: COLORS.text,
+    textAlign: 'center',
     width: '100%',
-    marginBottom: SPACING.l,
+  },
+  footer: {
+    padding: SPACING.l,
+    paddingBottom: SPACING.xl,
+  },
+  saveButtonContainer: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
   },
   saveButton: {
-    backgroundColor: COLORS.primary,
-    padding: SPACING.m,
-    borderRadius: SIZES.radius,
+    height: 56,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: SPACING.m,
   },
   saveButtonDisabled: {
     backgroundColor: COLORS.border,
     opacity: 0.5,
   },
   saveButtonText: {
-    color: COLORS.background,
-    fontSize: 16,
-    ...FONTS.bold,
+    ...FONTS.headline,
+    color: 'white',
   },
 });

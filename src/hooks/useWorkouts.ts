@@ -50,11 +50,21 @@ export const useWorkouts = () => {
     }
   };
 
+  const clearWorkouts = async () => {
+    try {
+      setWorkouts([]);
+      await AsyncStorage.removeItem(STORAGE_KEY);
+    } catch (e) {
+      console.error('Failed to clear workouts', e);
+    }
+  };
+
   return {
     workouts,
     loading,
     addWorkout,
     deleteWorkout,
+    clearWorkouts,
     refreshWorkouts: loadWorkouts,
   };
 };

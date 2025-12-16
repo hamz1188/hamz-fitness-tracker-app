@@ -5,11 +5,12 @@ import Animated, {
   useAnimatedProps,
   useSharedValue,
   withTiming,
-  withSpring,
   useDerivedValue,
+  withRepeat,
+  withSequence,
   Easing,
 } from 'react-native-reanimated';
-import { COLORS, FONTS } from '../constants/theme';
+import { COLORS, FONTS, SIZES } from '../constants/theme';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -22,19 +23,31 @@ interface CircularProgressProps {
 
 export const CircularProgress: React.FC<CircularProgressProps> = ({
   progress,
-  size = 200,
-  strokeWidth = 15,
+  size = SIZES.screenHeight * 0.35, // Bigger default size (~40% height requested but adjusted for safe areas)
+  strokeWidth = 24,
   showText = true,
 }) => {
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
   const progressValue = useSharedValue(0);
+  const glowOpacity = useSharedValue(0.5);
 
   useEffect(() => {
     progressValue.value = withTiming(progress, {
       duration: 1500,
-      easing: Easing.out(Easing.exp),
+      easing: Easing.out(Easing.cubic),
     });
+
+    if (progress >= 1) {
+      glowOpacity.value = withRepeat(
+        withSequence(
+          withTiming(0.8, { duration: 1000 }),
+          withTiming(0.4, { duration: 1000 })
+        ),
+        -1,
+        true
+      );
+    }
   }, [progress]);
 
   const animatedProps = useAnimatedProps(() => {
@@ -43,25 +56,20 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
     };
   });
 
-  // Calculate percentage text
-  // Note: For complex text animation in Reanimated, we often use ReText or runOnJS,
-  // but for simplicity I'll just show the static or passed prop, or a simple text.
-  // To keep it smooth, I'll just render the target percentage for now or use a separate reanimated text component if needed.
-  // For this MVP, I'll display the target progress formatted as %.
-
   return (
     <View style={[styles.container, { width: size, height: size }]}>
       <Svg width={size} height={size}>
         <Defs>
-          <LinearGradient id="grad" x1="0" y1="0" x2="1" y2="0">
-            <Stop offset="0" stopColor={COLORS.primary} stopOpacity="1" />
-            <Stop offset="1" stopColor={COLORS.success} stopOpacity="1" />
+          <LinearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+            <Stop offset="0" stopColor={COLORS.ringStart} stopOpacity="1" />
+            <Stop offset="0.5" stopColor={COLORS.ringMiddle} stopOpacity="1" />
+            <Stop offset="1" stopColor={COLORS.ringEnd} stopOpacity="1" />
           </LinearGradient>
         </Defs>
         
-        {/* Background Circle */}
+        {/* Background Track */}
         <Circle
-          stroke={COLORS.card}
+          stroke={COLORS.glassMorphism}
           fill="none"
           cx={size / 2}
           cy={size / 2}
@@ -69,7 +77,7 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
           strokeWidth={strokeWidth}
         />
         
-        {/* Foreground Circle */}
+        {/* Animated Progress Ring */}
         <AnimatedCircle
           stroke="url(#grad)"
           fill="none"
@@ -82,6 +90,7 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
           animatedProps={animatedProps}
           rotation="-90"
           origin={`${size / 2}, ${size / 2}`}
+          // Add shadow/glow effect directly to the stroke if possible, otherwise use a separate blurred circle behind
         />
       </Svg>
       
@@ -101,6 +110,7 @@ const styles = StyleSheet.create({
   container: {
     justifyContent: 'center',
     alignItems: 'center',
+    // Outer glow for the whole component if desired, but specificity asked for ring glow
   },
   textContainer: {
     position: 'absolute',
@@ -109,14 +119,14 @@ const styles = StyleSheet.create({
   },
   percentageText: {
     color: COLORS.text,
-    fontSize: 42,
-    ...FONTS.bold,
+    fontSize: 72,
+    fontWeight: '700',
+    letterSpacing: -1.5,
   },
   subText: {
     color: COLORS.textSecondary,
-    fontSize: 14,
+    fontSize: 16,
     marginTop: 4,
-    ...FONTS.medium,
+    fontWeight: '500',
   },
 });
-
