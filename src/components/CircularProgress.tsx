@@ -166,16 +166,16 @@ const styles = StyleSheet.create({
   },
   percentageText: {
     color: COLORS.text,
-    fontSize: 72,
+    fontSize: 48,
     fontWeight: '800',
-    letterSpacing: -2,
+    letterSpacing: -1,
   },
   subText: {
     color: COLORS.primary,
-    fontSize: 14,
-    marginTop: 4,
+    fontSize: 12,
+    marginTop: 2,
     fontWeight: '600',
     textTransform: 'uppercase',
-    letterSpacing: 2,
+    letterSpacing: 1.5,
   },
 });

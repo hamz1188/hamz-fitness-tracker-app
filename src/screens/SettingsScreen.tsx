@@ -104,9 +104,8 @@ const styles = StyleSheet.create({
     marginRight: SPACING.m,
   },
   headerTitle: {
-    fontSize: 20,
+    ...FONTS.headline,
     color: COLORS.text,
-    ...FONTS.bold,
   },
   content: {
     padding: SPACING.l,
@@ -116,11 +115,9 @@ const styles = StyleSheet.create({
     padding: SPACING.m,
   },
   sectionTitle: {
-    fontSize: 14,
+    ...FONTS.caption2,
     color: COLORS.textSecondary,
     marginBottom: SPACING.m,
-    ...FONTS.bold,
-    textTransform: 'uppercase',
   },
   row: {
     flexDirection: 'row',
@@ -130,14 +127,12 @@ const styles = StyleSheet.create({
     borderBottomColor: COLORS.border,
   },
   label: {
-    fontSize: 16,
+    ...FONTS.body,
     color: COLORS.text,
-    ...FONTS.regular,
   },
   value: {
-    fontSize: 16,
+    ...FONTS.body,
     color: COLORS.textSecondary,
-    ...FONTS.medium,
   },
   dangerButton: {
     flexDirection: 'row',
@@ -149,9 +144,8 @@ const styles = StyleSheet.create({
     marginTop: SPACING.s,
   },
   dangerButtonText: {
+    ...FONTS.headline,
     color: COLORS.error,
-    fontSize: 16,
-    ...FONTS.bold,
     marginLeft: SPACING.s,
   },
 });

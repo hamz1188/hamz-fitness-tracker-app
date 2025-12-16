@@ -6,7 +6,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { View, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HomeScreen } from '../screens/HomeScreen';
 import { AddWorkoutScreen } from '../screens/AddWorkoutScreen';
@@ -22,10 +21,8 @@ const Stack = createNativeStackNavigator();
 
 // Custom floating tab bar component
 const FloatingTabBar = ({ state, descriptors, navigation }: any) => {
-  const insets = useSafeAreaInsets();
-
   return (
-    <View style={[styles.floatingContainer, { bottom: Math.max(insets.bottom, 16) }]}>
+    <View style={[styles.floatingContainer, { bottom: 8 }]}>
       {/* Main tabs container */}
       <View style={styles.mainTabsWrapper}>
         <BlurView intensity={60} tint="dark" style={StyleSheet.absoluteFill} />
