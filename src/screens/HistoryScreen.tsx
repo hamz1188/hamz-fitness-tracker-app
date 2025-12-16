@@ -1,5 +1,5 @@
 import React, { useMemo, useCallback, useState } from 'react';
-import { Text, StyleSheet, View, SectionList, TouchableOpacity, TextInput, Animated } from 'react-native';
+import { Text, StyleSheet, View, SectionList, TouchableOpacity, TextInput, Animated, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { format, isToday, isYesterday, parseISO } from 'date-fns';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
@@ -12,6 +12,7 @@ import { COLORS, FONTS, SPACING, SIZES } from '../constants/theme';
 import { useWorkouts } from '../hooks/useWorkouts';
 import { Workout } from '../types';
 
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const FILTER_TABS = ['All', 'Strength', 'Cardio'];
 
 export const HistoryScreen = () => {
@@ -125,7 +126,7 @@ export const HistoryScreen = () => {
 
   return (
     <ScreenWrapper>
-      <View style={styles.container}>
+      <View style={{ flex: 1 }}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>History</Text>
         </View>
@@ -151,13 +152,14 @@ export const HistoryScreen = () => {
 
         {/* Filter Pills */}
         <View style={styles.filterContainer}>
-          {FILTER_TABS.map((tab) => (
+          {FILTER_TABS.map((tab, index) => (
             <TouchableOpacity 
               key={tab} 
               onPress={() => setActiveFilter(tab)}
               style={[
                 styles.filterPill,
-                activeFilter === tab && styles.filterPillActive
+                activeFilter === tab && styles.filterPillActive,
+                index === 0 && { marginLeft: 0 } // Reset margin for first item handled by container
               ]}
             >
               {activeFilter === tab && (
@@ -200,57 +202,63 @@ export const HistoryScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 60,
-  },
   header: {
-    paddingHorizontal: SPACING.l,
-    marginBottom: SPACING.m,
+    paddingHorizontal: 16,
+    marginBottom: 16,
+    paddingTop: 50,
   },
   headerTitle: {
-    ...FONTS.title1,
+    fontSize: 34,
+    fontWeight: '700',
     color: COLORS.text,
+    textAlign: 'left',
   },
   searchContainer: {
-    paddingHorizontal: SPACING.l,
-    marginBottom: SPACING.m,
+    paddingHorizontal: 16,
+    marginBottom: 16,
   },
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: SPACING.m,
-    height: 44,
-    borderRadius: 12,
+    paddingHorizontal: 16,
+    height: 52,
+    borderRadius: 26,
   },
   searchInput: {
     flex: 1,
-    marginLeft: SPACING.s,
+    marginLeft: 8,
     color: COLORS.text,
-    ...FONTS.body,
+    fontSize: 17,
+    height: '100%',
+    textAlignVertical: 'center',
   },
   filterContainer: {
     flexDirection: 'row',
-    paddingHorizontal: SPACING.l,
-    marginBottom: SPACING.l,
+    paddingHorizontal: 16,
+    marginBottom: 16,
   },
   filterPill: {
     paddingVertical: 8,
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     borderRadius: 20,
     marginRight: 8,
     backgroundColor: COLORS.glassMorphism,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: COLORS.border,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   filterPillActive: {
     borderWidth: 0,
   },
   filterText: {
-    ...FONTS.caption1,
+    fontSize: 13,
     color: COLORS.textSecondary,
     fontWeight: '600',
+    textAlign: 'center',
+    includeFontPadding: false,
+    textAlignVertical: 'center',
   },
   filterTextActive: {
     color: 'white',
@@ -258,10 +266,10 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingBottom: 100,
-    paddingHorizontal: SPACING.l,
+    paddingHorizontal: 16,
   },
   workoutItem: {
-    marginBottom: SPACING.m,
+    marginBottom: 16,
     padding: 0,
   },
   row: {
@@ -270,37 +278,41 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   workoutIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: SPACING.m,
+    marginRight: 16,
   },
   workoutInfo: {
     flex: 1,
   },
   workoutTitle: {
-    ...FONTS.headline,
     fontSize: 17,
+    fontWeight: '600',
     color: COLORS.text,
+    marginBottom: 4,
+    textAlign: 'left',
   },
   workoutDetails: {
-    ...FONTS.caption1,
+    fontSize: 13,
     color: COLORS.textSecondary,
-    marginTop: 2,
+    textAlign: 'left',
   },
   workoutTime: {
-    ...FONTS.caption2,
+    fontSize: 11,
     color: COLORS.textTertiary,
+    textTransform: 'uppercase',
+    fontWeight: '500',
   },
   deleteButtonContainer: {
     width: 80,
-    height: '100%', // Match item height
+    height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingLeft: SPACING.s,
-    marginBottom: SPACING.m, // Match item margin
+    paddingLeft: 8,
+    marginBottom: 16,
   },
   deleteButton: {
     width: 50,
@@ -314,26 +326,34 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyContainer: {
-    paddingHorizontal: SPACING.l,
-    marginTop: SPACING.xl,
+    paddingHorizontal: 16,
+    marginTop: 32,
+    alignItems: 'center',
   },
   emptyState: {
     alignItems: 'center',
-    padding: SPACING.xl,
+    padding: 40,
+    width: '100%',
+    maxWidth: SCREEN_WIDTH - 48,
   },
   emptyText: {
-    ...FONTS.headline,
+    fontSize: 20,
+    fontWeight: '600',
     color: COLORS.textSecondary,
-    marginTop: SPACING.m,
+    marginTop: 16,
+    textAlign: 'center',
   },
   sectionHeader: {
-    paddingVertical: SPACING.s,
-    backgroundColor: COLORS.background, // Should match background for sticky header
-    marginBottom: SPACING.s,
+    paddingVertical: 8,
+    backgroundColor: COLORS.background,
+    marginBottom: 8,
   },
   sectionHeaderText: {
-    ...FONTS.caption2,
+    fontSize: 15,
+    fontWeight: '700',
     color: COLORS.textSecondary,
-    letterSpacing: 1,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    textAlign: 'left',
   },
 });

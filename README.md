@@ -78,6 +78,13 @@ A premium, professional fitness tracking mobile application built with React Nat
     - [x] Haptic feedback on all interactions.
     - [x] Layout adaptability for all iPhone sizes.
 
+### **Phase 6: Layout Optimization (Completed)**
+- [x] **Full-Screen Layout:**
+    - [x] Removed dead space on top and bottom of the app.
+    - [x] App now stretches to full screen height with proper safe area handling.
+    - [x] Tab bar positioned closer to home button line using safe area insets.
+    - [x] Optimized padding across all screens for edge-to-edge display.
+
 ## 🛠 Setup & Run
 
 1.  **Install Dependencies:**

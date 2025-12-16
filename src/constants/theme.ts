@@ -5,7 +5,7 @@ const { width, height } = Dimensions.get('window');
 export const COLORS = {
   // Backgrounds
   background: '#000000',        // Pure black
-  cardBackground: 'rgba(28, 28, 30, 0.7)',  // Translucent dark
+  cardBackground: 'rgba(28, 28, 30, 0.85)',  // Slightly more opaque as requested
   glassMorphism: 'rgba(255, 255, 255, 0.08)', // Frosted glass effect
   
   // Accents
@@ -29,6 +29,11 @@ export const COLORS = {
   // UI Elements
   border: 'rgba(255, 255, 255, 0.1)',
   tabBar: 'rgba(20, 20, 20, 0.8)', // Semi-transparent for blur
+  
+  gradient: {
+    backgroundStart: '#000000',
+    backgroundEnd: '#121212',
+  },
 };
 
 export const SPACING = {

@@ -23,31 +23,19 @@ interface CircularProgressProps {
 
 export const CircularProgress: React.FC<CircularProgressProps> = ({
   progress,
-  size = SIZES.screenHeight * 0.35, // Bigger default size (~40% height requested but adjusted for safe areas)
+  size = 280, // Fixed size as requested
   strokeWidth = 24,
   showText = true,
 }) => {
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
   const progressValue = useSharedValue(0);
-  const glowOpacity = useSharedValue(0.5);
 
   useEffect(() => {
     progressValue.value = withTiming(progress, {
       duration: 1500,
       easing: Easing.out(Easing.cubic),
     });
-
-    if (progress >= 1) {
-      glowOpacity.value = withRepeat(
-        withSequence(
-          withTiming(0.8, { duration: 1000 }),
-          withTiming(0.4, { duration: 1000 })
-        ),
-        -1,
-        true
-      );
-    }
   }, [progress]);
 
   const animatedProps = useAnimatedProps(() => {
@@ -69,7 +57,7 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
         
         {/* Background Track */}
         <Circle
-          stroke={COLORS.glassMorphism}
+          stroke="rgba(255, 255, 255, 0.1)"
           fill="none"
           cx={size / 2}
           cy={size / 2}
@@ -90,7 +78,6 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
           animatedProps={animatedProps}
           rotation="-90"
           origin={`${size / 2}, ${size / 2}`}
-          // Add shadow/glow effect directly to the stroke if possible, otherwise use a separate blurred circle behind
         />
       </Svg>
       
@@ -110,23 +97,30 @@ const styles = StyleSheet.create({
   container: {
     justifyContent: 'center',
     alignItems: 'center',
-    // Outer glow for the whole component if desired, but specificity asked for ring glow
   },
   textContainer: {
     position: 'absolute',
     justifyContent: 'center',
     alignItems: 'center',
+    width: '100%',
+    height: '100%',
   },
   percentageText: {
     color: COLORS.text,
     fontSize: 72,
     fontWeight: '700',
     letterSpacing: -1.5,
+    textAlign: 'center',
+    includeFontPadding: false,
+    textAlignVertical: 'center',
   },
   subText: {
     color: COLORS.textSecondary,
     fontSize: 16,
     marginTop: 4,
     fontWeight: '500',
+    textAlign: 'center',
+    includeFontPadding: false,
+    textAlignVertical: 'center',
   },
 });

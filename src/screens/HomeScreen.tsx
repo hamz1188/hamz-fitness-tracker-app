@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { format, isSameDay, parseISO } from 'date-fns';
 import { useFocusEffect } from '@react-navigation/native';
@@ -13,6 +13,8 @@ import { COLORS, SPACING, FONTS, SIZES } from '../constants/theme';
 import { useWorkouts } from '../hooks/useWorkouts';
 import { useUser } from '../hooks/useUser';
 import { Workout } from '../types';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const StatCard = ({ icon, value, label, color }: { icon: any, value: string | number, label: string, color: string }) => (
   <GlassCard style={styles.statCard}>
@@ -94,15 +96,7 @@ export const HomeScreen = ({ navigation }: any) => {
   const stats = useMemo(() => {
     const totalWorkouts = workouts.length;
     const uniqueExercises = new Set(workouts.map(w => w.exerciseName)).size;
-    
-    // Simplified streak calculation logic for brevity
-    // In a real app, ensure this handles date gaps properly
-    let currentStreak = 0;
-    if (workouts.length > 0) {
-        // ... previous logic
-        // Placeholder for correct calc
-        currentStreak = user?.currentStreak || 0; 
-    }
+    let currentStreak = user?.currentStreak || 0; 
 
     return { totalWorkouts, uniqueExercises, currentStreak };
   }, [workouts, user]);
@@ -124,16 +118,13 @@ export const HomeScreen = ({ navigation }: any) => {
       >
         <View style={styles.header}>
           <View>
-            <Text style={styles.greeting}>{getGreeting()}, {user?.name || 'Athlete'}</Text>
+            <Text style={styles.greeting}>{getGreeting()}, {user?.name ? user.name : 'Athlete'}</Text>
             <Text style={styles.date}>{format(today, 'EEEE, MMM do')}</Text>
           </View>
-          <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
-             {/* Simple avatar or profile link if needed, specs say "Keep minimal" */}
-          </TouchableOpacity>
         </View>
 
         <View style={styles.heroSection}>
-          <CircularProgress progress={progress} size={SIZES.screenHeight * 0.35} />
+          <CircularProgress progress={progress} size={280} />
           {progress >= 1 && (
              <Text style={styles.goalText}>Goal Met! 🔥</Text>
           )}
@@ -197,7 +188,7 @@ export const HomeScreen = ({ navigation }: any) => {
           </GlassCard>
         )}
         
-        <View style={{ height: 100 }} />
+        <View style={{ height: 120 }} />
       </ScrollView>
     </ScreenWrapper>
   );
@@ -205,76 +196,91 @@ export const HomeScreen = ({ navigation }: any) => {
 
 const styles = StyleSheet.create({
   scrollContent: {
-    paddingTop: 60,
+    paddingTop: 50,
     paddingBottom: 100,
   },
   header: {
-    paddingHorizontal: SPACING.l,
-    marginBottom: SPACING.l,
+    paddingHorizontal: 16,
+    marginBottom: 24,
   },
   greeting: {
-    ...FONTS.title2,
+    fontSize: 20,
+    fontWeight: '600',
     color: COLORS.textSecondary,
+    marginBottom: 4,
+    textAlign: 'left',
   },
   date: {
-    ...FONTS.title1,
+    fontSize: 32,
+    fontWeight: '700',
     color: COLORS.primary,
-    marginTop: 4,
+    textAlign: 'left',
   },
   heroSection: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: SPACING.xl,
-    height: SIZES.screenHeight * 0.4,
+    marginBottom: 32,
+    height: 300, 
   },
   goalText: {
-    ...FONTS.headline,
+    fontSize: 20,
+    fontWeight: '600',
     color: COLORS.warning,
-    marginTop: SPACING.m,
+    marginTop: 16,
+    textAlign: 'center',
   },
   statsScroll: {
-    marginBottom: SPACING.xl,
+    marginBottom: 32,
   },
   statsScrollContent: {
-    paddingHorizontal: SPACING.l,
+    paddingHorizontal: 16,
   },
   statCard: {
     width: 140,
-    height: 110, // Adjusted for content
-    marginRight: 16,
+    height: 110,
+    marginRight: 12,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 16,
   },
   statIconWrapper: {
     marginBottom: 8,
+    alignItems: 'center',
   },
   statValue: {
     fontSize: 28,
     fontWeight: '700',
     color: COLORS.text,
+    textAlign: 'center',
+    includeFontPadding: false,
+    textAlignVertical: 'center',
   },
   statLabel: {
-    ...FONTS.caption1,
+    fontSize: 13,
     color: COLORS.textSecondary,
+    textAlign: 'center',
+    includeFontPadding: false,
+    textAlignVertical: 'center',
   },
   sectionHeader: {
-    paddingHorizontal: SPACING.l,
-    marginBottom: SPACING.m,
+    paddingHorizontal: 16,
+    marginBottom: 16,
   },
   sectionTitle: {
-    ...FONTS.title2,
+    fontSize: 24,
+    fontWeight: '700',
     color: COLORS.text,
+    textAlign: 'left',
   },
   workoutItem: {
-    marginHorizontal: SPACING.l,
+    marginHorizontal: 16,
     marginBottom: 16,
-    padding: 0, // Reset padding as GlassCard has 20px, we want custom inner layout
+    padding: 0,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16, // Apply padding here
+    padding: 16,
   },
   workoutIcon: {
     width: 48,
@@ -291,22 +297,25 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     color: COLORS.text,
+    textAlign: 'left',
   },
   workoutDetails: {
-    ...FONTS.callout,
+    fontSize: 15,
     color: COLORS.textSecondary,
     marginTop: 4,
+    textAlign: 'left',
   },
   workoutTime: {
-    ...FONTS.caption1,
+    fontSize: 13,
     color: COLORS.textTertiary,
+    textAlign: 'right',
   },
   deleteButtonContainer: {
     width: 80,
     height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingRight: SPACING.l,
+    paddingRight: 16,
   },
   deleteButton: {
     width: 56,
@@ -320,15 +329,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyState: {
-    marginHorizontal: SPACING.l,
+    marginHorizontal: 16,
     padding: 40,
     alignItems: 'center',
     justifyContent: 'center',
+    maxWidth: SCREEN_WIDTH - 32, // Constrain width properly
+    alignSelf: 'center',
   },
   emptyText: {
-    ...FONTS.headline,
+    fontSize: 20,
+    fontWeight: '600',
     color: COLORS.textSecondary,
     marginVertical: 16,
+    textAlign: 'center',
   },
   logButton: {
     width: '100%',
@@ -342,7 +355,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logButtonText: {
-    ...FONTS.headline,
+    fontSize: 17,
+    fontWeight: '600',
     color: 'white',
+    textAlign: 'center',
   },
 });

@@ -10,7 +10,9 @@ interface ScreenWrapperProps {
 }
 
 export const ScreenWrapper: React.FC<ScreenWrapperProps> = ({ children, useSafeArea = true }) => {
+  // Only apply safe area to left and right edges, not top and bottom
   const Container = useSafeArea ? SafeAreaView : View;
+  const edges = useSafeArea ? ['left', 'right'] : [];
 
   return (
     <LinearGradient
@@ -19,10 +21,17 @@ export const ScreenWrapper: React.FC<ScreenWrapperProps> = ({ children, useSafeA
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
     >
-      <Container style={styles.container}>
-        <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
-        {children}
-      </Container>
+      {useSafeArea ? (
+        <SafeAreaView style={styles.container} edges={edges}>
+          <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+          {children}
+        </SafeAreaView>
+      ) : (
+        <View style={styles.container}>
+          <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+          {children}
+        </View>
+      )}
     </LinearGradient>
   );
 };

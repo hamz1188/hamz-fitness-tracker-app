@@ -3,9 +3,9 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { View, Platform, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Platform, ActivityIndicator, StyleSheet, Text } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HomeScreen } from '../screens/HomeScreen';
 import { AddWorkoutScreen } from '../screens/AddWorkoutScreen';
@@ -13,42 +13,15 @@ import { HistoryScreen } from '../screens/HistoryScreen';
 import { StatsScreen } from '../screens/StatsScreen';
 import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
-import { COLORS, SPACING } from '../constants/theme';
+import { COLORS } from '../constants/theme';
 import { useUser } from '../hooks/useUser';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-const AddButton = ({ children, onPress }: any) => (
-  <TouchableOpacity
-    style={{
-      top: -30,
-      justifyContent: 'center',
-      alignItems: 'center',
-    }}
-    onPress={onPress}
-  >
-    <LinearGradient
-      colors={[COLORS.primary, COLORS.ringMiddle]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={{
-        width: 72,
-        height: 72,
-        borderRadius: 36,
-        shadowColor: COLORS.primary,
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.4,
-        shadowRadius: 20,
-        elevation: 8,
-      }}
-    >
-      {children}
-    </LinearGradient>
-  </TouchableOpacity>
-);
-
 const TabNavigator = () => {
+  const insets = useSafeAreaInsets();
+
   return (
     <Tab.Navigator
       screenOptions={{
@@ -61,7 +34,9 @@ const TabNavigator = () => {
           elevation: 0,
           borderTopWidth: 1,
           borderTopColor: 'rgba(255,255,255,0.1)',
-          height: 88, // Standard safe area height
+          height: 60 + insets.bottom, // Base height + bottom safe area
+          paddingBottom: insets.bottom,
+          paddingTop: 8,
           backgroundColor: 'transparent',
         },
         tabBarBackground: () => (
@@ -99,11 +74,31 @@ const TabNavigator = () => {
         name="Add"
         component={AddWorkoutScreen}
         options={{
-          tabBarButton: (props) => (
-            <AddButton {...props}>
-              <Ionicons name="add" size={32} color="#FFF" />
-            </AddButton>
+          tabBarIcon: ({ focused }) => (
+            <View style={{
+              width: 56,
+              height: 56,
+              borderRadius: 28,
+              backgroundColor: COLORS.primary,
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginTop: -10,  // Slight elevation only
+              shadowColor: COLORS.primary,
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.4,
+              shadowRadius: 8,
+              elevation: 8,
+            }}>
+              <Text style={{ 
+                fontSize: 28, 
+                color: '#FFF', 
+                fontWeight: '600',
+                lineHeight: 28,  // Important for vertical centering
+                textAlign: 'center',
+              }}>+</Text>
+            </View>
           ),
+          tabBarLabel: () => null,  // No label for center tab
         }}
       />
       <Tab.Screen

@@ -117,94 +117,96 @@ export const StatsScreen = ({ navigation }: any) => {
 
   return (
     <ScreenWrapper>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        
-        {/* Profile Section */}
-        <View style={styles.profileHeader}>
-          <View style={styles.avatarContainer}>
-            <Text style={styles.avatarText}>
-              {user?.name ? user.name.charAt(0).toUpperCase() : 'A'}
-            </Text>
+      <View style={{ flex: 1 }}>
+        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+          
+          {/* Profile Section */}
+          <View style={styles.profileHeader}>
+            <View style={styles.avatarContainer}>
+              <Text style={styles.avatarText}>
+                {user?.name ? user.name.charAt(0).toUpperCase() : 'A'}
+              </Text>
+            </View>
+            <View style={styles.profileInfo}>
+              <Text style={styles.userName}>{user?.name || 'Athlete'}</Text>
+              <Text style={styles.memberSince}>Member since {user?.joinDate ? format(parseISO(user.joinDate as string), 'MMM yyyy') : '2025'}</Text>
+            </View>
+            <TouchableOpacity 
+              style={styles.editButton} 
+              onPress={() => navigation.navigate('Settings')}
+            >
+              <Text style={styles.editButtonText}>Edit</Text>
+            </TouchableOpacity>
           </View>
-          <View style={styles.profileInfo}>
-            <Text style={styles.userName}>{user?.name || 'Athlete'}</Text>
-            <Text style={styles.memberSince}>Member since {user?.joinDate ? format(parseISO(user.joinDate as string), 'MMM yyyy') : '2025'}</Text>
+
+          <BarChart data={weeklyData} />
+
+          <Text style={styles.sectionHeader}>Personal Records</Text>
+          <View style={styles.gridContainer}>
+            {personalRecords.length > 0 ? (
+              personalRecords.map((pr, index) => (
+                <View key={index} style={styles.gridItem}>
+                  <StatRow 
+                    label={pr.exerciseName}
+                    value={
+                      pr.exerciseType === 'strength' 
+                        ? `${pr.weight}kg` 
+                        : `${pr.distance}km`
+                    }
+                    icon="trophy"
+                    color="#FFD700" 
+                  />
+                </View>
+              ))
+            ) : (
+              <Text style={styles.emptyText}>No records yet</Text>
+            )}
           </View>
-          <TouchableOpacity 
-            style={styles.editButton} 
-            onPress={() => navigation.navigate('Settings')}
-          >
-            <Text style={styles.editButtonText}>Edit</Text>
-          </TouchableOpacity>
-        </View>
 
-        <BarChart data={weeklyData} />
+          <Text style={styles.sectionHeader}>Achievements</Text>
+          <View style={styles.badgesContainer}>
+            <Badge 
+              title="First Step" 
+              icon="footsteps" 
+              color={COLORS.primary} 
+              unlocked={stats.total >= 1} 
+            />
+            <Badge 
+              title="On Fire" 
+              icon="flame" 
+              color={COLORS.warning} 
+              unlocked={stats.total >= 5} 
+            />
+            <Badge 
+              title="Dedicated" 
+              icon="fitness" 
+              color={COLORS.success} 
+              unlocked={stats.total >= 10} 
+            />
+            <Badge 
+              title="Iron" 
+              icon="barbell" 
+              color="#E0E0E0" 
+              unlocked={stats.total >= 50} 
+            />
+          </View>
 
-        <Text style={styles.sectionHeader}>Personal Records</Text>
-        <View style={styles.gridContainer}>
-          {personalRecords.length > 0 ? (
-            personalRecords.map((pr, index) => (
-              <View key={index} style={styles.gridItem}>
-                <StatRow 
-                  label={pr.exerciseName}
-                  value={
-                    pr.exerciseType === 'strength' 
-                      ? `${pr.weight}kg` 
-                      : `${pr.distance}km`
-                  }
-                  icon="trophy"
-                  color="#FFD700" 
-                />
-              </View>
-            ))
-          ) : (
-            <Text style={styles.emptyText}>No records yet</Text>
-          )}
-        </View>
-
-        <Text style={styles.sectionHeader}>Achievements</Text>
-        <View style={styles.badgesContainer}>
-          <Badge 
-            title="First Step" 
-            icon="footsteps" 
-            color={COLORS.primary} 
-            unlocked={stats.total >= 1} 
-          />
-          <Badge 
-            title="On Fire" 
-            icon="flame" 
-            color={COLORS.warning} 
-            unlocked={stats.total >= 5} 
-          />
-          <Badge 
-            title="Dedicated" 
-            icon="fitness" 
-            color={COLORS.success} 
-            unlocked={stats.total >= 10} 
-          />
-          <Badge 
-            title="Iron" 
-            icon="barbell" 
-            color="#E0E0E0" 
-            unlocked={stats.total >= 50} 
-          />
-        </View>
-
-      </ScrollView>
+        </ScrollView>
+      </View>
     </ScreenWrapper>
   );
 };
 
 const styles = StyleSheet.create({
   content: {
-    padding: SPACING.l,
-    paddingTop: 60,
+    paddingHorizontal: 16,
+    paddingTop: 50,
     paddingBottom: 100,
   },
   profileHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: SPACING.xl,
+    marginBottom: 32,
   },
   avatarContainer: {
     width: 80,
@@ -215,23 +217,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: COLORS.border,
-    marginRight: SPACING.m,
+    marginRight: 16,
   },
   avatarText: {
-    ...FONTS.title1,
+    fontSize: 32,
+    fontWeight: '700',
     color: COLORS.primary,
+    textAlign: 'center',
+    textAlignVertical: 'center',
   },
   profileInfo: {
     flex: 1,
   },
   userName: {
-    ...FONTS.title2,
+    fontSize: 24,
+    fontWeight: '600',
     color: COLORS.text,
+    textAlign: 'left',
   },
   memberSince: {
-    ...FONTS.caption1,
+    fontSize: 13,
     color: COLORS.textSecondary,
     marginTop: 4,
+    textAlign: 'left',
   },
   editButton: {
     paddingVertical: 6,
@@ -242,24 +250,30 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(0, 212, 255, 0.3)',
   },
   editButtonText: {
-    ...FONTS.caption2,
+    fontSize: 11,
     color: COLORS.primary,
     fontWeight: '700',
+    textTransform: 'uppercase',
+    textAlign: 'center',
   },
   sectionHeader: {
-    ...FONTS.headline,
+    fontSize: 20,
+    fontWeight: '600',
     color: COLORS.text,
-    marginBottom: SPACING.m,
-    marginTop: SPACING.l,
+    marginBottom: 16,
+    marginTop: 24,
+    textAlign: 'left',
   },
   sectionTitle: {
-    ...FONTS.headline,
+    fontSize: 20,
+    fontWeight: '600',
     color: COLORS.text,
-    marginBottom: SPACING.l,
+    marginBottom: 24,
+    textAlign: 'left',
   },
   chartContainer: {
-    padding: SPACING.l,
-    marginBottom: SPACING.l,
+    padding: 20,
+    marginBottom: 24,
   },
   chart: {
     flexDirection: 'row',
@@ -284,8 +298,10 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   barLabel: {
-    ...FONTS.caption2,
+    fontSize: 11,
+    fontWeight: '500',
     color: COLORS.textTertiary,
+    textAlign: 'center',
   },
   gridContainer: {
     flexDirection: 'row',
@@ -294,10 +310,10 @@ const styles = StyleSheet.create({
   },
   gridItem: {
     width: '48%', // 2 columns
-    marginBottom: SPACING.m,
+    marginBottom: 16,
   },
   statRowCard: {
-    padding: SPACING.m,
+    padding: 16,
   },
   statRowContent: {
     flexDirection: 'row',
@@ -309,21 +325,26 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: SPACING.m,
+    marginRight: 16,
   },
   statRowLabel: {
-    ...FONTS.caption1,
+    fontSize: 13,
     color: COLORS.textSecondary,
     marginBottom: 2,
+    textAlign: 'left',
   },
   statRowValue: {
-    ...FONTS.headline,
+    fontSize: 20,
+    fontWeight: '600',
     color: COLORS.text,
+    textAlign: 'left',
   },
   emptyText: {
-    ...FONTS.body,
+    fontSize: 17,
     color: COLORS.textSecondary,
     fontStyle: 'italic',
+    textAlign: 'center',
+    width: '100%',
   },
   badgesContainer: {
     flexDirection: 'row',
@@ -332,9 +353,9 @@ const styles = StyleSheet.create({
   },
   badge: {
     width: '48%',
-    padding: SPACING.l,
+    padding: 24,
     alignItems: 'center',
-    marginBottom: SPACING.m,
+    marginBottom: 16,
     aspectRatio: 1, // Square cards
     justifyContent: 'center',
   },
@@ -347,10 +368,11 @@ const styles = StyleSheet.create({
     borderRadius: 32,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: SPACING.m,
+    marginBottom: 16,
   },
   badgeText: {
-    ...FONTS.callout,
+    fontSize: 15,
+    fontWeight: '500',
     color: COLORS.text,
     textAlign: 'center',
   },
