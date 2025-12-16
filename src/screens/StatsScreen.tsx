@@ -13,10 +13,10 @@ import { useUser } from '../hooks/useUser';
 import { Workout } from '../types';
 
 const BarChart = ({ data }: { data: { day: string; count: number }[] }) => {
-  const maxCount = Math.max(...data.map(d => d.count), 1); 
+  const maxCount = Math.max(...data.map(d => d.count), 1);
 
   return (
-    <GlassCard style={styles.chartContainer}>
+    <GlassCard style={styles.chartContainer} glowColor="cyan">
       <Text style={styles.sectionTitle}>Weekly Activity</Text>
       <View style={styles.chart}>
         {data.map((item, index) => {
@@ -26,14 +26,16 @@ const BarChart = ({ data }: { data: { day: string; count: number }[] }) => {
               <View style={styles.barTrack}>
                 {item.count > 0 && (
                   <LinearGradient
-                    colors={[COLORS.primary, COLORS.success]}
-                    style={[styles.bar, { height: Math.max(height, 8) }]} 
+                    colors={[COLORS.primary, COLORS.secondary]}
+                    start={{ x: 0, y: 1 }}
+                    end={{ x: 0, y: 0 }}
+                    style={[styles.bar, { height: Math.max(height, 8) }]}
                   />
                 )}
               </View>
               <Text style={[
-                styles.barLabel, 
-                item.count > 0 && { color: COLORS.text, fontWeight: '700' }
+                styles.barLabel,
+                item.count > 0 && { color: COLORS.primary, fontWeight: '700' }
               ]}>{item.day}</Text>
             </View>
           );
@@ -44,28 +46,39 @@ const BarChart = ({ data }: { data: { day: string; count: number }[] }) => {
 };
 
 const StatRow = ({ label, value, icon, color }: any) => (
-  <GlassCard style={styles.statRowCard}>
+  <GlassCard style={styles.statRowCard} noPadding>
     <View style={styles.statRowContent}>
       <View style={[styles.smallIcon, { backgroundColor: `${color}20` }]}>
         <Ionicons name={icon} size={20} color={color} />
       </View>
-      <View style={{ flex: 1 }}>
-        <Text style={styles.statRowLabel}>{label}</Text>
+      <View style={styles.statRowInfo}>
+        <Text style={styles.statRowLabel} numberOfLines={1}>{label}</Text>
         <Text style={styles.statRowValue}>{value}</Text>
       </View>
     </View>
   </GlassCard>
 );
 
+const getGlowFromColor = (color: string): 'cyan' | 'pink' | 'green' | 'none' => {
+  if (color === COLORS.primary) return 'cyan';
+  if (color === COLORS.secondary) return 'pink';
+  if (color === COLORS.success) return 'green';
+  return 'none';
+};
+
 const Badge = ({ title, icon, color, unlocked }: any) => (
-  <GlassCard 
-    style={[styles.badge, !unlocked && styles.badgeLocked]} 
+  <GlassCard
+    style={[styles.badge, !unlocked && styles.badgeLocked]}
     intensity={unlocked ? 30 : 5}
+    noPadding
+    glowColor={unlocked ? getGlowFromColor(color) : 'none'}
   >
-    <View style={[styles.badgeIcon, { backgroundColor: unlocked ? `${color}20` : 'rgba(255,255,255,0.05)' }]}>
-      <Ionicons name={icon} size={32} color={unlocked ? color : COLORS.textTertiary} />
+    <View style={styles.badgeContent}>
+      <View style={[styles.badgeIcon, { backgroundColor: unlocked ? `${color}20` : 'rgba(255,255,255,0.05)' }]}>
+        <Ionicons name={icon} size={32} color={unlocked ? color : COLORS.textTertiary} />
+      </View>
+      <Text style={[styles.badgeText, !unlocked && styles.textLocked, unlocked && { color }]}>{title}</Text>
     </View>
-    <Text style={[styles.badgeText, !unlocked && styles.textLocked]}>{title}</Text>
   </GlassCard>
 );
 
@@ -219,7 +232,7 @@ const styles = StyleSheet.create({
   },
   avatarText: {
     ...FONTS.title1,
-    color: COLORS.primary,
+    color: COLORS.secondary,
   },
   profileInfo: {
     flex: 1,
@@ -237,13 +250,13 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 16,
-    backgroundColor: 'rgba(0, 212, 255, 0.1)',
+    backgroundColor: `${COLORS.secondary}15`,
     borderWidth: 1,
-    borderColor: 'rgba(0, 212, 255, 0.3)',
+    borderColor: `${COLORS.secondary}40`,
   },
   editButtonText: {
     ...FONTS.caption2,
-    color: COLORS.primary,
+    color: COLORS.secondary,
     fontWeight: '700',
   },
   sectionHeader: {
@@ -297,19 +310,24 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.m,
   },
   statRowCard: {
-    padding: SPACING.m,
+    height: 80,
   },
   statRowContent: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    padding: SPACING.m,
   },
   smallIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: SPACING.m,
+    marginRight: SPACING.s,
+  },
+  statRowInfo: {
+    flex: 1,
   },
   statRowLabel: {
     ...FONTS.caption1,
@@ -318,6 +336,7 @@ const styles = StyleSheet.create({
   },
   statRowValue: {
     ...FONTS.headline,
+    fontSize: 18,
     color: COLORS.text,
   },
   emptyText: {
@@ -332,22 +351,25 @@ const styles = StyleSheet.create({
   },
   badge: {
     width: '48%',
-    padding: SPACING.l,
-    alignItems: 'center',
     marginBottom: SPACING.m,
-    aspectRatio: 1, // Square cards
-    justifyContent: 'center',
+    aspectRatio: 1,
   },
   badgeLocked: {
     opacity: 0.6,
   },
+  badgeContent: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: SPACING.m,
+  },
   badgeIcon: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: SPACING.m,
+    marginBottom: SPACING.s,
   },
   badgeText: {
     ...FONTS.callout,

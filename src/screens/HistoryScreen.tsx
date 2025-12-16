@@ -99,11 +99,11 @@ export const HistoryScreen = () => {
       >
         <GlassCard style={styles.workoutItem}>
           <View style={styles.row}>
-            <View style={[styles.workoutIcon, { backgroundColor: item.exerciseType === 'cardio' ? 'rgba(255, 159, 10, 0.2)' : 'rgba(0, 212, 255, 0.2)' }]}>
-              <Ionicons 
-                name={item.exerciseType === 'cardio' ? 'bicycle' : 'barbell'} 
-                size={24} 
-                color={item.exerciseType === 'cardio' ? COLORS.warning : COLORS.primary} 
+            <View style={[styles.workoutIcon, { backgroundColor: item.exerciseType === 'cardio' ? `${COLORS.warning}20` : `${COLORS.primary}20` }]}>
+              <Ionicons
+                name={item.exerciseType === 'cardio' ? 'bicycle' : 'barbell'}
+                size={24}
+                color={item.exerciseType === 'cardio' ? COLORS.warning : COLORS.primary}
               />
             </View>
             <View style={styles.workoutInfo}>
@@ -132,20 +132,24 @@ export const HistoryScreen = () => {
 
         {/* Search Bar */}
         <View style={styles.searchContainer}>
-          <GlassCard style={styles.searchBar} intensity={10}>
-            <Ionicons name="search" size={20} color={COLORS.textSecondary} />
-            <TextInput 
-              style={styles.searchInput}
-              placeholder="Search history..."
-              placeholderTextColor={COLORS.textSecondary}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
-            {searchQuery.length > 0 && (
-              <TouchableOpacity onPress={() => setSearchQuery('')}>
-                <Ionicons name="close-circle" size={20} color={COLORS.textSecondary} />
-              </TouchableOpacity>
-            )}
+          <GlassCard style={styles.searchBar} intensity={10} noPadding>
+            <View style={styles.searchInner}>
+              <Ionicons name="search" size={20} color={COLORS.textSecondary} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search exercises..."
+                placeholderTextColor={COLORS.textSecondary}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              {searchQuery.length > 0 && (
+                <TouchableOpacity onPress={() => setSearchQuery('')}>
+                  <Ionicons name="close-circle" size={20} color={COLORS.textSecondary} />
+                </TouchableOpacity>
+              )}
+            </View>
           </GlassCard>
         </View>
 
@@ -162,7 +166,7 @@ export const HistoryScreen = () => {
             >
               {activeFilter === tab && (
                 <LinearGradient
-                  colors={[COLORS.primary, COLORS.ringMiddle]}
+                  colors={[COLORS.primary, COLORS.secondary]}
                   start={{x:0, y:0}}
                   end={{x:1, y:0}}
                   style={StyleSheet.absoluteFill}
@@ -210,24 +214,28 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     ...FONTS.title1,
-    color: COLORS.text,
+    color: COLORS.primary,
   },
   searchContainer: {
     paddingHorizontal: SPACING.l,
     marginBottom: SPACING.m,
   },
   searchBar: {
+    height: 48,
+    borderRadius: 24,
+  },
+  searchInner: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: SPACING.m,
-    height: 44,
-    borderRadius: 12,
   },
   searchInput: {
     flex: 1,
     marginLeft: SPACING.s,
-    color: COLORS.text,
     ...FONTS.body,
+    color: COLORS.text,
+    height: 48,
   },
   filterContainer: {
     flexDirection: 'row',
@@ -314,17 +322,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyContainer: {
+    flex: 1,
     paddingHorizontal: SPACING.l,
-    marginTop: SPACING.xl,
+    justifyContent: 'center',
   },
   emptyState: {
     alignItems: 'center',
-    padding: SPACING.xl,
+    justifyContent: 'center',
+    paddingVertical: SPACING.xxl,
+    paddingHorizontal: SPACING.xl,
   },
   emptyText: {
     ...FONTS.headline,
     color: COLORS.textSecondary,
     marginTop: SPACING.m,
+    textAlign: 'center',
   },
   sectionHeader: {
     paddingVertical: SPACING.s,

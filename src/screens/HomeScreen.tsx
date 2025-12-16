@@ -14,13 +14,23 @@ import { useWorkouts } from '../hooks/useWorkouts';
 import { useUser } from '../hooks/useUser';
 import { Workout } from '../types';
 
+const getGlowColor = (color: string): 'cyan' | 'pink' | 'green' | 'none' => {
+  if (color === COLORS.primary) return 'cyan';
+  if (color === COLORS.secondary) return 'pink';
+  if (color === COLORS.success) return 'green';
+  if (color === COLORS.warning) return 'pink';
+  return 'none';
+};
+
 const StatCard = ({ icon, value, label, color }: { icon: any, value: string | number, label: string, color: string }) => (
-  <GlassCard style={styles.statCard}>
-    <View style={styles.statIconWrapper}>
-      <Ionicons name={icon} size={32} color={color} />
+  <GlassCard style={styles.statCard} noPadding glowColor={getGlowColor(color)}>
+    <View style={styles.statCardContent}>
+      <View style={[styles.statIconWrapper, { backgroundColor: `${color}20` }]}>
+        <Ionicons name={icon} size={24} color={color} />
+      </View>
+      <Text style={[styles.statValue, { color }]}>{value}</Text>
+      <Text style={styles.statLabel}>{label}</Text>
     </View>
-    <Text style={styles.statValue}>{value}</Text>
-    <Text style={styles.statLabel}>{label}</Text>
   </GlassCard>
 );
 
@@ -50,11 +60,11 @@ const WorkoutItem = ({ item, onDelete }: { item: Workout; onDelete: (id: string)
     <Swipeable renderRightActions={renderRightActions}>
       <GlassCard style={styles.workoutItem}>
         <View style={styles.row}>
-          <View style={[styles.workoutIcon, { backgroundColor: item.exerciseType === 'cardio' ? 'rgba(255, 159, 10, 0.2)' : 'rgba(0, 212, 255, 0.2)' }]}>
-            <Ionicons 
-              name={item.exerciseType === 'cardio' ? 'bicycle' : 'barbell'} 
-              size={24} 
-              color={item.exerciseType === 'cardio' ? COLORS.warning : COLORS.primary} 
+          <View style={[styles.workoutIcon, { backgroundColor: item.exerciseType === 'cardio' ? `${COLORS.warning}20` : `${COLORS.primary}20` }]}>
+            <Ionicons
+              name={item.exerciseType === 'cardio' ? 'bicycle' : 'barbell'}
+              size={24}
+              color={item.exerciseType === 'cardio' ? COLORS.warning : COLORS.primary}
             />
           </View>
           <View style={styles.workoutInfo}>
@@ -133,9 +143,9 @@ export const HomeScreen = ({ navigation }: any) => {
         </View>
 
         <View style={styles.heroSection}>
-          <CircularProgress progress={progress} size={SIZES.screenHeight * 0.35} />
+          <CircularProgress progress={progress} size={SIZES.screenHeight * 0.30} />
           {progress >= 1 && (
-             <Text style={styles.goalText}>Goal Met! 🔥</Text>
+             <Text style={styles.goalText}>Goal Met!</Text>
           )}
         </View>
 
@@ -224,8 +234,7 @@ const styles = StyleSheet.create({
   heroSection: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: SPACING.xl,
-    height: SIZES.screenHeight * 0.4,
+    marginBottom: SPACING.l,
   },
   goalText: {
     ...FONTS.headline,
@@ -236,23 +245,34 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xl,
   },
   statsScrollContent: {
-    paddingHorizontal: SPACING.l,
+    paddingLeft: SPACING.l,
+    paddingRight: SPACING.s,
   },
   statCard: {
-    width: 140,
-    height: 110, // Adjusted for content
-    marginRight: 16,
+    width: 110,
+    height: 120,
+    marginRight: SPACING.m,
+  },
+  statCardContent: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 16,
+    paddingVertical: SPACING.m,
+    paddingHorizontal: SPACING.s,
   },
   statIconWrapper: {
-    marginBottom: 8,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: SPACING.s,
   },
   statValue: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: '700',
     color: COLORS.text,
+    marginBottom: 2,
   },
   statLabel: {
     ...FONTS.caption1,

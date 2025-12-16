@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
-import Svg, { Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
+import Svg, { Circle, Defs, LinearGradient, Stop, G } from 'react-native-svg';
 import Animated, {
   useAnimatedProps,
   useSharedValue,
@@ -9,6 +9,7 @@ import Animated, {
   withRepeat,
   withSequence,
   Easing,
+  useAnimatedStyle,
 } from 'react-native-reanimated';
 import { COLORS, FONTS, SIZES } from '../constants/theme';
 
@@ -23,11 +24,13 @@ interface CircularProgressProps {
 
 export const CircularProgress: React.FC<CircularProgressProps> = ({
   progress,
-  size = SIZES.screenHeight * 0.35, // Bigger default size (~40% height requested but adjusted for safe areas)
-  strokeWidth = 24,
+  size = SIZES.screenHeight * 0.35,
+  strokeWidth = 20,
   showText = true,
 }) => {
-  const radius = (size - strokeWidth) / 2;
+  const glowExtra = 8; // Extra width for glow stroke
+  const totalStrokeWidth = strokeWidth + glowExtra;
+  const radius = (size - totalStrokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
   const progressValue = useSharedValue(0);
   const glowOpacity = useSharedValue(0.5);
@@ -56,8 +59,23 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
     };
   });
 
+  const AnimatedView = Animated.View;
+  const glowStyle = useAnimatedStyle(() => ({
+    opacity: glowOpacity.value,
+  }));
+
   return (
     <View style={[styles.container, { width: size, height: size }]}>
+      {/* Glow effect behind the ring */}
+      <AnimatedView style={[styles.glowContainer, { width: size, height: size }, glowStyle]}>
+        <View style={[styles.glow, {
+          width: size * 0.85,
+          height: size * 0.85,
+          borderRadius: size * 0.425,
+          shadowRadius: 40,
+        }]} />
+      </AnimatedView>
+
       <Svg width={size} height={size}>
         <Defs>
           <LinearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
@@ -65,19 +83,39 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
             <Stop offset="0.5" stopColor={COLORS.ringMiddle} stopOpacity="1" />
             <Stop offset="1" stopColor={COLORS.ringEnd} stopOpacity="1" />
           </LinearGradient>
+          <LinearGradient id="glowGrad" x1="0" y1="0" x2="1" y2="1">
+            <Stop offset="0" stopColor={COLORS.ringStart} stopOpacity="0.5" />
+            <Stop offset="0.5" stopColor={COLORS.ringMiddle} stopOpacity="0.5" />
+            <Stop offset="1" stopColor={COLORS.ringEnd} stopOpacity="0.5" />
+          </LinearGradient>
         </Defs>
-        
+
         {/* Background Track */}
         <Circle
-          stroke={COLORS.glassMorphism}
+          stroke="rgba(255, 255, 255, 0.05)"
           fill="none"
           cx={size / 2}
           cy={size / 2}
           r={radius}
           strokeWidth={strokeWidth}
         />
-        
-        {/* Animated Progress Ring */}
+
+        {/* Glow ring behind main progress */}
+        <AnimatedCircle
+          stroke="url(#glowGrad)"
+          fill="none"
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          strokeWidth={totalStrokeWidth}
+          strokeDasharray={`${circumference} ${circumference}`}
+          strokeLinecap="round"
+          animatedProps={animatedProps}
+          rotation="-90"
+          origin={`${size / 2}, ${size / 2}`}
+        />
+
+        {/* Main Progress Ring */}
         <AnimatedCircle
           stroke="url(#grad)"
           fill="none"
@@ -90,10 +128,9 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
           animatedProps={animatedProps}
           rotation="-90"
           origin={`${size / 2}, ${size / 2}`}
-          // Add shadow/glow effect directly to the stroke if possible, otherwise use a separate blurred circle behind
         />
       </Svg>
-      
+
       {showText && (
         <View style={styles.textContainer}>
           <Text style={styles.percentageText}>
@@ -110,7 +147,17 @@ const styles = StyleSheet.create({
   container: {
     justifyContent: 'center',
     alignItems: 'center',
-    // Outer glow for the whole component if desired, but specificity asked for ring glow
+  },
+  glowContainer: {
+    position: 'absolute',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  glow: {
+    backgroundColor: 'transparent',
+    shadowColor: COLORS.ringMiddle,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
   },
   textContainer: {
     position: 'absolute',
@@ -120,13 +167,15 @@ const styles = StyleSheet.create({
   percentageText: {
     color: COLORS.text,
     fontSize: 72,
-    fontWeight: '700',
-    letterSpacing: -1.5,
+    fontWeight: '800',
+    letterSpacing: -2,
   },
   subText: {
-    color: COLORS.textSecondary,
-    fontSize: 16,
+    color: COLORS.primary,
+    fontSize: 14,
     marginTop: 4,
-    fontWeight: '500',
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 2,
   },
 });
