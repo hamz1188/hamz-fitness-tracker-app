@@ -1,5 +1,5 @@
 import React, { useMemo, useCallback, useState } from 'react';
-import { Text, StyleSheet, View, SectionList, TouchableOpacity, TextInput, Animated, Dimensions } from 'react-native';
+import { Text, StyleSheet, View, SectionList, TouchableOpacity, TextInput, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { format, isToday, isYesterday, parseISO } from 'date-fns';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
@@ -12,7 +12,6 @@ import { COLORS, FONTS, SPACING, SIZES } from '../constants/theme';
 import { useWorkouts } from '../hooks/useWorkouts';
 import { Workout } from '../types';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const FILTER_TABS = ['All', 'Strength', 'Cardio'];
 
 export const HistoryScreen = () => {
@@ -100,11 +99,11 @@ export const HistoryScreen = () => {
       >
         <GlassCard style={styles.workoutItem}>
           <View style={styles.row}>
-            <View style={[styles.workoutIcon, { backgroundColor: item.exerciseType === 'cardio' ? 'rgba(255, 159, 10, 0.2)' : 'rgba(0, 212, 255, 0.2)' }]}>
-              <Ionicons 
-                name={item.exerciseType === 'cardio' ? 'bicycle' : 'barbell'} 
-                size={24} 
-                color={item.exerciseType === 'cardio' ? COLORS.warning : COLORS.primary} 
+            <View style={[styles.workoutIcon, { backgroundColor: item.exerciseType === 'cardio' ? `${COLORS.warning}20` : `${COLORS.primary}20` }]}>
+              <Ionicons
+                name={item.exerciseType === 'cardio' ? 'bicycle' : 'barbell'}
+                size={24}
+                color={item.exerciseType === 'cardio' ? COLORS.warning : COLORS.primary}
               />
             </View>
             <View style={styles.workoutInfo}>
@@ -126,45 +125,48 @@ export const HistoryScreen = () => {
 
   return (
     <ScreenWrapper>
-      <View style={{ flex: 1 }}>
+      <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>History</Text>
         </View>
 
         {/* Search Bar */}
         <View style={styles.searchContainer}>
-          <GlassCard style={styles.searchBar} intensity={10}>
-            <Ionicons name="search" size={20} color={COLORS.textSecondary} />
-            <TextInput 
-              style={styles.searchInput}
-              placeholder="Search history..."
-              placeholderTextColor={COLORS.textSecondary}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
-            {searchQuery.length > 0 && (
-              <TouchableOpacity onPress={() => setSearchQuery('')}>
-                <Ionicons name="close-circle" size={20} color={COLORS.textSecondary} />
-              </TouchableOpacity>
-            )}
+          <GlassCard style={styles.searchBar} intensity={10} noPadding>
+            <View style={styles.searchInner}>
+              <Ionicons name="search" size={20} color={COLORS.textSecondary} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search exercises..."
+                placeholderTextColor={COLORS.textSecondary}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              {searchQuery.length > 0 && (
+                <TouchableOpacity onPress={() => setSearchQuery('')}>
+                  <Ionicons name="close-circle" size={20} color={COLORS.textSecondary} />
+                </TouchableOpacity>
+              )}
+            </View>
           </GlassCard>
         </View>
 
         {/* Filter Pills */}
         <View style={styles.filterContainer}>
-          {FILTER_TABS.map((tab, index) => (
+          {FILTER_TABS.map((tab) => (
             <TouchableOpacity 
               key={tab} 
               onPress={() => setActiveFilter(tab)}
               style={[
                 styles.filterPill,
-                activeFilter === tab && styles.filterPillActive,
-                index === 0 && { marginLeft: 0 } // Reset margin for first item handled by container
+                activeFilter === tab && styles.filterPillActive
               ]}
             >
               {activeFilter === tab && (
                 <LinearGradient
-                  colors={[COLORS.primary, COLORS.ringMiddle]}
+                  colors={[COLORS.primary, COLORS.secondary]}
                   start={{x:0, y:0}}
                   end={{x:1, y:0}}
                   style={StyleSheet.absoluteFill}
@@ -202,63 +204,61 @@ export const HistoryScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingTop: 60,
+  },
   header: {
-    paddingHorizontal: 16,
-    marginBottom: 16,
-    paddingTop: 50,
+    paddingHorizontal: SPACING.l,
+    marginBottom: SPACING.m,
   },
   headerTitle: {
-    fontSize: 34,
-    fontWeight: '700',
-    color: COLORS.text,
-    textAlign: 'left',
+    ...FONTS.title1,
+    color: COLORS.primary,
   },
   searchContainer: {
-    paddingHorizontal: 16,
-    marginBottom: 16,
+    paddingHorizontal: SPACING.l,
+    marginBottom: SPACING.m,
   },
   searchBar: {
+    height: 48,
+    borderRadius: 24,
+  },
+  searchInner: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    height: 52,
-    borderRadius: 26,
+    paddingHorizontal: SPACING.m,
   },
   searchInput: {
     flex: 1,
-    marginLeft: 8,
+    marginLeft: SPACING.s,
+    ...FONTS.body,
     color: COLORS.text,
-    fontSize: 17,
-    height: '100%',
-    textAlignVertical: 'center',
+    height: 48,
   },
   filterContainer: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
-    marginBottom: 16,
+    paddingHorizontal: SPACING.l,
+    marginBottom: SPACING.l,
   },
   filterPill: {
     paddingVertical: 8,
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
     borderRadius: 20,
     marginRight: 8,
     backgroundColor: COLORS.glassMorphism,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: COLORS.border,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   filterPillActive: {
     borderWidth: 0,
   },
   filterText: {
-    fontSize: 13,
+    ...FONTS.caption1,
     color: COLORS.textSecondary,
     fontWeight: '600',
-    textAlign: 'center',
-    includeFontPadding: false,
-    textAlignVertical: 'center',
   },
   filterTextActive: {
     color: 'white',
@@ -266,10 +266,10 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingBottom: 100,
-    paddingHorizontal: 16,
+    paddingHorizontal: SPACING.l,
   },
   workoutItem: {
-    marginBottom: 16,
+    marginBottom: SPACING.m,
     padding: 0,
   },
   row: {
@@ -278,41 +278,37 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   workoutIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
+    marginRight: SPACING.m,
   },
   workoutInfo: {
     flex: 1,
   },
   workoutTitle: {
+    ...FONTS.headline,
     fontSize: 17,
-    fontWeight: '600',
     color: COLORS.text,
-    marginBottom: 4,
-    textAlign: 'left',
   },
   workoutDetails: {
-    fontSize: 13,
+    ...FONTS.caption1,
     color: COLORS.textSecondary,
-    textAlign: 'left',
+    marginTop: 2,
   },
   workoutTime: {
-    fontSize: 11,
+    ...FONTS.caption2,
     color: COLORS.textTertiary,
-    textTransform: 'uppercase',
-    fontWeight: '500',
   },
   deleteButtonContainer: {
     width: 80,
-    height: '100%',
+    height: '100%', // Match item height
     justifyContent: 'center',
     alignItems: 'center',
-    paddingLeft: 8,
-    marginBottom: 16,
+    paddingLeft: SPACING.s,
+    marginBottom: SPACING.m, // Match item margin
   },
   deleteButton: {
     width: 50,
@@ -326,34 +322,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyContainer: {
-    paddingHorizontal: 16,
-    marginTop: 32,
-    alignItems: 'center',
+    flex: 1,
+    paddingHorizontal: SPACING.l,
+    justifyContent: 'center',
   },
   emptyState: {
     alignItems: 'center',
-    padding: 40,
-    width: '100%',
-    maxWidth: SCREEN_WIDTH - 48,
+    justifyContent: 'center',
+    paddingVertical: SPACING.xxl,
+    paddingHorizontal: SPACING.xl,
   },
   emptyText: {
-    fontSize: 20,
-    fontWeight: '600',
+    ...FONTS.headline,
     color: COLORS.textSecondary,
-    marginTop: 16,
+    marginTop: SPACING.m,
     textAlign: 'center',
   },
   sectionHeader: {
-    paddingVertical: 8,
-    backgroundColor: COLORS.background,
-    marginBottom: 8,
+    paddingVertical: SPACING.s,
+    backgroundColor: COLORS.background, // Should match background for sticky header
+    marginBottom: SPACING.s,
   },
   sectionHeaderText: {
-    fontSize: 15,
-    fontWeight: '700',
+    ...FONTS.caption2,
     color: COLORS.textSecondary,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    textAlign: 'left',
+    letterSpacing: 1,
   },
 });

@@ -13,10 +13,10 @@ import { useUser } from '../hooks/useUser';
 import { Workout } from '../types';
 
 const BarChart = ({ data }: { data: { day: string; count: number }[] }) => {
-  const maxCount = Math.max(...data.map(d => d.count), 1); 
+  const maxCount = Math.max(...data.map(d => d.count), 1);
 
   return (
-    <GlassCard style={styles.chartContainer}>
+    <GlassCard style={styles.chartContainer} glowColor="cyan">
       <Text style={styles.sectionTitle}>Weekly Activity</Text>
       <View style={styles.chart}>
         {data.map((item, index) => {
@@ -26,14 +26,16 @@ const BarChart = ({ data }: { data: { day: string; count: number }[] }) => {
               <View style={styles.barTrack}>
                 {item.count > 0 && (
                   <LinearGradient
-                    colors={[COLORS.primary, COLORS.success]}
-                    style={[styles.bar, { height: Math.max(height, 8) }]} 
+                    colors={[COLORS.primary, COLORS.secondary]}
+                    start={{ x: 0, y: 1 }}
+                    end={{ x: 0, y: 0 }}
+                    style={[styles.bar, { height: Math.max(height, 8) }]}
                   />
                 )}
               </View>
               <Text style={[
-                styles.barLabel, 
-                item.count > 0 && { color: COLORS.text, fontWeight: '700' }
+                styles.barLabel,
+                item.count > 0 && { color: COLORS.primary, fontWeight: '700' }
               ]}>{item.day}</Text>
             </View>
           );
@@ -44,28 +46,39 @@ const BarChart = ({ data }: { data: { day: string; count: number }[] }) => {
 };
 
 const StatRow = ({ label, value, icon, color }: any) => (
-  <GlassCard style={styles.statRowCard}>
+  <GlassCard style={styles.statRowCard} noPadding>
     <View style={styles.statRowContent}>
       <View style={[styles.smallIcon, { backgroundColor: `${color}20` }]}>
         <Ionicons name={icon} size={20} color={color} />
       </View>
-      <View style={{ flex: 1 }}>
-        <Text style={styles.statRowLabel}>{label}</Text>
+      <View style={styles.statRowInfo}>
+        <Text style={styles.statRowLabel} numberOfLines={1}>{label}</Text>
         <Text style={styles.statRowValue}>{value}</Text>
       </View>
     </View>
   </GlassCard>
 );
 
+const getGlowFromColor = (color: string): 'cyan' | 'pink' | 'green' | 'none' => {
+  if (color === COLORS.primary) return 'cyan';
+  if (color === COLORS.secondary) return 'pink';
+  if (color === COLORS.success) return 'green';
+  return 'none';
+};
+
 const Badge = ({ title, icon, color, unlocked }: any) => (
-  <GlassCard 
-    style={[styles.badge, !unlocked && styles.badgeLocked]} 
+  <GlassCard
+    style={unlocked ? styles.badge : [styles.badge, styles.badgeLocked]}
     intensity={unlocked ? 30 : 5}
+    noPadding
+    glowColor={unlocked ? getGlowFromColor(color) : 'none'}
   >
-    <View style={[styles.badgeIcon, { backgroundColor: unlocked ? `${color}20` : 'rgba(255,255,255,0.05)' }]}>
-      <Ionicons name={icon} size={32} color={unlocked ? color : COLORS.textTertiary} />
+    <View style={styles.badgeContent}>
+      <View style={[styles.badgeIcon, { backgroundColor: unlocked ? `${color}20` : 'rgba(255,255,255,0.05)' }]}>
+        <Ionicons name={icon} size={32} color={unlocked ? color : COLORS.textTertiary} />
+      </View>
+      <Text style={unlocked ? [styles.badgeText, { color }] : [styles.badgeText, styles.textLocked]}>{title}</Text>
     </View>
-    <Text style={[styles.badgeText, !unlocked && styles.textLocked]}>{title}</Text>
   </GlassCard>
 );
 
@@ -117,96 +130,94 @@ export const StatsScreen = ({ navigation }: any) => {
 
   return (
     <ScreenWrapper>
-      <View style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          
-          {/* Profile Section */}
-          <View style={styles.profileHeader}>
-            <View style={styles.avatarContainer}>
-              <Text style={styles.avatarText}>
-                {user?.name ? user.name.charAt(0).toUpperCase() : 'A'}
-              </Text>
-            </View>
-            <View style={styles.profileInfo}>
-              <Text style={styles.userName}>{user?.name || 'Athlete'}</Text>
-              <Text style={styles.memberSince}>Member since {user?.joinDate ? format(parseISO(user.joinDate as string), 'MMM yyyy') : '2025'}</Text>
-            </View>
-            <TouchableOpacity 
-              style={styles.editButton} 
-              onPress={() => navigation.navigate('Settings')}
-            >
-              <Text style={styles.editButtonText}>Edit</Text>
-            </TouchableOpacity>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        
+        {/* Profile Section */}
+        <View style={styles.profileHeader}>
+          <View style={styles.avatarContainer}>
+            <Text style={styles.avatarText}>
+              {user?.name ? user.name.charAt(0).toUpperCase() : 'A'}
+            </Text>
           </View>
-
-          <BarChart data={weeklyData} />
-
-          <Text style={styles.sectionHeader}>Personal Records</Text>
-          <View style={styles.gridContainer}>
-            {personalRecords.length > 0 ? (
-              personalRecords.map((pr, index) => (
-                <View key={index} style={styles.gridItem}>
-                  <StatRow 
-                    label={pr.exerciseName}
-                    value={
-                      pr.exerciseType === 'strength' 
-                        ? `${pr.weight}kg` 
-                        : `${pr.distance}km`
-                    }
-                    icon="trophy"
-                    color="#FFD700" 
-                  />
-                </View>
-              ))
-            ) : (
-              <Text style={styles.emptyText}>No records yet</Text>
-            )}
+          <View style={styles.profileInfo}>
+            <Text style={styles.userName}>{user?.name || 'Athlete'}</Text>
+            <Text style={styles.memberSince}>Member since {user?.joinDate ? format(parseISO(user.joinDate as string), 'MMM yyyy') : '2025'}</Text>
           </View>
+          <TouchableOpacity 
+            style={styles.editButton} 
+            onPress={() => navigation.navigate('Settings')}
+          >
+            <Text style={styles.editButtonText}>Edit</Text>
+          </TouchableOpacity>
+        </View>
 
-          <Text style={styles.sectionHeader}>Achievements</Text>
-          <View style={styles.badgesContainer}>
-            <Badge 
-              title="First Step" 
-              icon="footsteps" 
-              color={COLORS.primary} 
-              unlocked={stats.total >= 1} 
-            />
-            <Badge 
-              title="On Fire" 
-              icon="flame" 
-              color={COLORS.warning} 
-              unlocked={stats.total >= 5} 
-            />
-            <Badge 
-              title="Dedicated" 
-              icon="fitness" 
-              color={COLORS.success} 
-              unlocked={stats.total >= 10} 
-            />
-            <Badge 
-              title="Iron" 
-              icon="barbell" 
-              color="#E0E0E0" 
-              unlocked={stats.total >= 50} 
-            />
-          </View>
+        <BarChart data={weeklyData} />
 
-        </ScrollView>
-      </View>
+        <Text style={styles.sectionHeader}>Personal Records</Text>
+        <View style={styles.gridContainer}>
+          {personalRecords.length > 0 ? (
+            personalRecords.map((pr, index) => (
+              <View key={index} style={styles.gridItem}>
+                <StatRow 
+                  label={pr.exerciseName}
+                  value={
+                    pr.exerciseType === 'strength' 
+                      ? `${pr.weight}kg` 
+                      : `${pr.distance}km`
+                  }
+                  icon="trophy"
+                  color="#FFD700" 
+                />
+              </View>
+            ))
+          ) : (
+            <Text style={styles.emptyText}>No records yet</Text>
+          )}
+        </View>
+
+        <Text style={styles.sectionHeader}>Achievements</Text>
+        <View style={styles.badgesContainer}>
+          <Badge 
+            title="First Step" 
+            icon="footsteps" 
+            color={COLORS.primary} 
+            unlocked={stats.total >= 1} 
+          />
+          <Badge 
+            title="On Fire" 
+            icon="flame" 
+            color={COLORS.warning} 
+            unlocked={stats.total >= 5} 
+          />
+          <Badge 
+            title="Dedicated" 
+            icon="fitness" 
+            color={COLORS.success} 
+            unlocked={stats.total >= 10} 
+          />
+          <Badge 
+            title="Iron" 
+            icon="barbell" 
+            color="#E0E0E0" 
+            unlocked={stats.total >= 50} 
+          />
+        </View>
+
+      </ScrollView>
     </ScreenWrapper>
   );
 };
 
 const styles = StyleSheet.create({
   content: {
-    paddingHorizontal: 16,
-    paddingTop: 50,
+    padding: SPACING.l,
+    paddingTop: 60,
     paddingBottom: 100,
   },
   profileHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: SPACING.xl,
   },
   avatarContainer: {
     width: 80,
@@ -217,63 +228,51 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: COLORS.border,
-    marginRight: 16,
+    marginRight: SPACING.m,
   },
   avatarText: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: COLORS.primary,
-    textAlign: 'center',
-    textAlignVertical: 'center',
+    ...FONTS.title1,
+    color: COLORS.secondary,
   },
   profileInfo: {
     flex: 1,
   },
   userName: {
-    fontSize: 24,
-    fontWeight: '600',
+    ...FONTS.title2,
     color: COLORS.text,
-    textAlign: 'left',
   },
   memberSince: {
-    fontSize: 13,
+    ...FONTS.caption1,
     color: COLORS.textSecondary,
     marginTop: 4,
-    textAlign: 'left',
   },
   editButton: {
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 16,
-    backgroundColor: 'rgba(0, 212, 255, 0.1)',
+    backgroundColor: `${COLORS.secondary}15`,
     borderWidth: 1,
-    borderColor: 'rgba(0, 212, 255, 0.3)',
+    borderColor: `${COLORS.secondary}40`,
   },
   editButtonText: {
-    fontSize: 11,
-    color: COLORS.primary,
+    ...FONTS.caption2,
+    color: COLORS.secondary,
     fontWeight: '700',
-    textTransform: 'uppercase',
-    textAlign: 'center',
   },
   sectionHeader: {
-    fontSize: 20,
-    fontWeight: '600',
+    ...FONTS.headline,
     color: COLORS.text,
-    marginBottom: 16,
-    marginTop: 24,
-    textAlign: 'left',
+    marginBottom: SPACING.m,
+    marginTop: SPACING.l,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: '600',
+    ...FONTS.headline,
     color: COLORS.text,
-    marginBottom: 24,
-    textAlign: 'left',
+    marginBottom: SPACING.l,
   },
   chartContainer: {
-    padding: 20,
-    marginBottom: 24,
+    padding: SPACING.l,
+    marginBottom: SPACING.l,
   },
   chart: {
     flexDirection: 'row',
@@ -298,10 +297,8 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   barLabel: {
-    fontSize: 11,
-    fontWeight: '500',
+    ...FONTS.caption2,
     color: COLORS.textTertiary,
-    textAlign: 'center',
   },
   gridContainer: {
     flexDirection: 'row',
@@ -310,41 +307,42 @@ const styles = StyleSheet.create({
   },
   gridItem: {
     width: '48%', // 2 columns
-    marginBottom: 16,
+    marginBottom: SPACING.m,
   },
   statRowCard: {
-    padding: 16,
+    height: 80,
   },
   statRowContent: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    padding: SPACING.m,
   },
   smallIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
+    marginRight: SPACING.s,
+  },
+  statRowInfo: {
+    flex: 1,
   },
   statRowLabel: {
-    fontSize: 13,
+    ...FONTS.caption1,
     color: COLORS.textSecondary,
     marginBottom: 2,
-    textAlign: 'left',
   },
   statRowValue: {
-    fontSize: 20,
-    fontWeight: '600',
+    ...FONTS.headline,
+    fontSize: 18,
     color: COLORS.text,
-    textAlign: 'left',
   },
   emptyText: {
-    fontSize: 17,
+    ...FONTS.body,
     color: COLORS.textSecondary,
     fontStyle: 'italic',
-    textAlign: 'center',
-    width: '100%',
   },
   badgesContainer: {
     flexDirection: 'row',
@@ -353,26 +351,28 @@ const styles = StyleSheet.create({
   },
   badge: {
     width: '48%',
-    padding: 24,
-    alignItems: 'center',
-    marginBottom: 16,
-    aspectRatio: 1, // Square cards
-    justifyContent: 'center',
+    marginBottom: SPACING.m,
+    aspectRatio: 1,
   },
   badgeLocked: {
     opacity: 0.6,
   },
+  badgeContent: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: SPACING.m,
+  },
   badgeIcon: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: SPACING.s,
   },
   badgeText: {
-    fontSize: 15,
-    fontWeight: '500',
+    ...FONTS.callout,
     color: COLORS.text,
     textAlign: 'center',
   },
