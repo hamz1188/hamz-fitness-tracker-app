@@ -381,7 +381,7 @@ const styles = StyleSheet.create({
   },
   footer: {
     padding: SPACING.l,
-    paddingBottom: SPACING.xl,
+    paddingBottom: 100, // Clear the floating tab bar
   },
   saveButtonContainer: {
     borderRadius: 16,
