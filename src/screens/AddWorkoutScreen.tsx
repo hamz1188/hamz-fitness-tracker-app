@@ -12,7 +12,6 @@ import {
   ActivityIndicator
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, FONTS, SPACING, SIZES } from '../constants/theme';
 import { useWorkouts } from '../hooks/useWorkouts';
@@ -102,7 +101,6 @@ export const AddWorkoutScreen = ({ navigation }: any) => {
 
   return (
     <View style={styles.container}>
-      <BlurView intensity={80} tint="dark" style={StyleSheet.absoluteFill} />
       
       <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -119,7 +117,7 @@ export const AddWorkoutScreen = ({ navigation }: any) => {
         <ScrollView contentContainerStyle={styles.scrollContent}>
           {/* Exercise Name Input */}
           <View style={styles.inputGroup}>
-            <GlassCard style={styles.inputCard}>
+            <GlassCard style={styles.inputCard} contentStyle={styles.inputCardContent} noPadding>
               <Ionicons name="search" size={20} color={COLORS.textSecondary} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
@@ -135,21 +133,23 @@ export const AddWorkoutScreen = ({ navigation }: any) => {
             </GlassCard>
             
             {/* Suggestions List */}
-            {showSuggestions && exerciseName.length > 0 && (
-              <GlassCard style={styles.suggestionsContainer}>
-                {filteredExercises.map((ex, index) => (
-                  <TouchableOpacity 
-                    key={index} 
-                    style={styles.suggestionItem}
-                    onPress={() => handleExerciseSelect(ex.name, ex.type)}
-                  >
-                    <Text style={styles.suggestionIcon}>{ex.icon}</Text>
-                    <View style={styles.suggestionTextContainer}>
-                      <Text style={styles.suggestionText}>{ex.name}</Text>
-                      <Text style={styles.suggestionType}>{ex.type}</Text>
-                    </View>
-                  </TouchableOpacity>
-                ))}
+            {showSuggestions && exerciseName.length > 0 && filteredExercises.length > 0 && (
+              <GlassCard style={styles.suggestionsContainer} noPadding>
+                <ScrollView style={styles.suggestionsList} nestedScrollEnabled>
+                  {filteredExercises.map((ex, index) => (
+                    <TouchableOpacity 
+                      key={index} 
+                      style={styles.suggestionItem}
+                      onPress={() => handleExerciseSelect(ex.name, ex.type)}
+                    >
+                      <Text style={styles.suggestionIcon}>{ex.icon}</Text>
+                      <View style={styles.suggestionTextContainer}>
+                        <Text style={styles.suggestionText}>{ex.name}</Text>
+                        <Text style={styles.suggestionType}>{ex.type}</Text>
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
               </GlassCard>
             )}
           </View>
@@ -162,7 +162,7 @@ export const AddWorkoutScreen = ({ navigation }: any) => {
             <View style={styles.formGrid}>
               <View style={styles.gridItem}>
                 <Text style={styles.label}>SETS</Text>
-                <GlassCard style={styles.numberInputCard}>
+                <GlassCard style={styles.numberInputCard} contentStyle={styles.numberInputContent} noPadding>
                   <TextInput
                     style={styles.numberInput}
                     keyboardType="number-pad"
@@ -175,7 +175,7 @@ export const AddWorkoutScreen = ({ navigation }: any) => {
               </View>
               <View style={styles.gridItem}>
                 <Text style={styles.label}>REPS</Text>
-                <GlassCard style={styles.numberInputCard}>
+                <GlassCard style={styles.numberInputCard} contentStyle={styles.numberInputContent} noPadding>
                   <TextInput
                     style={styles.numberInput}
                     keyboardType="number-pad"
@@ -186,9 +186,9 @@ export const AddWorkoutScreen = ({ navigation }: any) => {
                   />
                 </GlassCard>
               </View>
-              <View style={[styles.gridItem, { width: '100%', marginTop: 16 }]}>
+              <View style={styles.gridItemFull}>
                 <Text style={styles.label}>WEIGHT (KG)</Text>
-                <GlassCard style={styles.numberInputCard}>
+                <GlassCard style={styles.numberInputCard} contentStyle={styles.numberInputContent} noPadding>
                   <TextInput
                     style={styles.numberInput}
                     keyboardType="numeric"
@@ -202,9 +202,9 @@ export const AddWorkoutScreen = ({ navigation }: any) => {
             </View>
           ) : (
             <View style={styles.formGrid}>
-              <View style={[styles.gridItem, { width: '100%' }]}>
+              <View style={styles.gridItemFull}>
                 <Text style={styles.label}>DISTANCE (KM)</Text>
-                <GlassCard style={styles.numberInputCard}>
+                <GlassCard style={styles.numberInputCard} contentStyle={styles.numberInputContent} noPadding>
                   <TextInput
                     style={styles.numberInput}
                     keyboardType="numeric"
@@ -215,9 +215,9 @@ export const AddWorkoutScreen = ({ navigation }: any) => {
                   />
                 </GlassCard>
               </View>
-              <View style={[styles.gridItem, { width: '100%', marginTop: 16 }]}>
+              <View style={styles.gridItemFull}>
                 <Text style={styles.label}>DURATION (MIN)</Text>
-                <GlassCard style={styles.numberInputCard}>
+                <GlassCard style={styles.numberInputCard} contentStyle={styles.numberInputContent} noPadding>
                   <TextInput
                     style={styles.numberInput}
                     keyboardType="number-pad"
@@ -261,7 +261,7 @@ export const AddWorkoutScreen = ({ navigation }: any) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'transparent',
+    backgroundColor: COLORS.background,
   },
   header: {
     flexDirection: 'row',
@@ -292,11 +292,14 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   inputCard: {
+    height: 56,
+    borderRadius: 16,
+  },
+  inputCardContent: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: SPACING.m,
-    height: 56,
-    borderRadius: 16,
+    height: '100%',
   },
   inputIcon: {
     marginRight: SPACING.s,
@@ -312,9 +315,11 @@ const styles = StyleSheet.create({
     top: 64,
     left: 0,
     right: 0,
-    maxHeight: 300,
+    maxHeight: 250,
     zIndex: 1000,
-    padding: 0,
+  },
+  suggestionsList: {
+    flex: 1,
   },
   suggestionItem: {
     padding: SPACING.m,
@@ -343,10 +348,14 @@ const styles = StyleSheet.create({
   formGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    gap: 16,
   },
   gridItem: {
-    width: '48%',
+    flex: 1,
+    minWidth: '45%',
+  },
+  gridItemFull: {
+    width: '100%',
   },
   label: {
     ...FONTS.caption2,
@@ -356,9 +365,12 @@ const styles = StyleSheet.create({
   },
   numberInputCard: {
     height: 72,
+    borderRadius: 16,
+  },
+  numberInputContent: {
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 16,
+    height: '100%',
   },
   numberInput: {
     fontSize: 32,
