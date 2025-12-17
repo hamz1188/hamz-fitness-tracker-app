@@ -68,7 +68,7 @@ const getGlowFromColor = (color: string): 'cyan' | 'pink' | 'green' | 'none' => 
 
 const Badge = ({ title, icon, color, unlocked }: any) => (
   <GlassCard
-    style={[styles.badge, !unlocked && styles.badgeLocked]}
+    style={unlocked ? styles.badge : [styles.badge, styles.badgeLocked]}
     intensity={unlocked ? 30 : 5}
     noPadding
     glowColor={unlocked ? getGlowFromColor(color) : 'none'}
@@ -77,7 +77,7 @@ const Badge = ({ title, icon, color, unlocked }: any) => (
       <View style={[styles.badgeIcon, { backgroundColor: unlocked ? `${color}20` : 'rgba(255,255,255,0.05)' }]}>
         <Ionicons name={icon} size={32} color={unlocked ? color : COLORS.textTertiary} />
       </View>
-      <Text style={[styles.badgeText, !unlocked && styles.textLocked, unlocked && { color }]}>{title}</Text>
+      <Text style={unlocked ? [styles.badgeText, { color }] : [styles.badgeText, styles.textLocked]}>{title}</Text>
     </View>
   </GlassCard>
 );

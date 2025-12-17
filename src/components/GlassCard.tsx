@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, ViewStyle, Pressable } from 'react-native';
+import { View, StyleSheet, ViewStyle, Pressable, StyleProp } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, SIZES } from '../constants/theme';
@@ -7,7 +7,8 @@ import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-na
 
 interface GlassCardProps {
   children: React.ReactNode;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
+  contentStyle?: StyleProp<ViewStyle>;
   intensity?: number;
   onPress?: () => void;
   noPadding?: boolean;
@@ -26,6 +27,7 @@ const glowColors = {
 export const GlassCard: React.FC<GlassCardProps> = ({
   children,
   style,
+  contentStyle,
   intensity = 25,
   onPress,
   noPadding = false,
@@ -69,7 +71,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({
           end={{ x: 1, y: 1 }}
           style={styles.gradientBorder}
         />
-        <View style={[styles.content, noPadding && { padding: 0 }]}>
+        <View style={[styles.content, noPadding && { padding: 0 }, contentStyle]}>
           {children}
         </View>
       </View>
