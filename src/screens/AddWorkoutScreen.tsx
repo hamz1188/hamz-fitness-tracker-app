@@ -53,14 +53,18 @@ export const AddWorkoutScreen = ({ navigation }: any) => {
     setExerciseName(name);
     setExerciseType(type as ExerciseType);
     setShowSuggestions(false);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
   };
 
   const handleSave = async () => {
     if (!exerciseName) return;
 
     setLoading(true);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
 
     const newWorkout: Workout = {
       id: Date.now().toString(),

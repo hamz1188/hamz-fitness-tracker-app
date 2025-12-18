@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { View, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -25,7 +25,11 @@ const FloatingTabBar = ({ state, descriptors, navigation }: any) => {
     <View style={[styles.floatingContainer, { bottom: 8 }]}>
       {/* Main tabs container */}
       <View style={styles.mainTabsWrapper}>
-        <BlurView intensity={60} tint="dark" style={StyleSheet.absoluteFill} />
+        {Platform.OS === 'web' ? (
+          <View style={[StyleSheet.absoluteFill, styles.webBlur]} />
+        ) : (
+          <BlurView intensity={60} tint="dark" style={StyleSheet.absoluteFill} />
+        )}
         <View style={styles.mainTabsContent}>
           {state.routes.map((route: any, index: number) => {
             // Skip the Add screen in the main tabs
@@ -169,9 +173,15 @@ const styles = StyleSheet.create({
     height: 56,
     borderRadius: 28,
     overflow: 'hidden',
-    backgroundColor: COLORS.cardBackground,
+    backgroundColor: Platform.OS === 'web' ? 'rgba(26, 26, 46, 0.7)' : COLORS.cardBackground,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.08)',
+  },
+  webBlur: {
+    backgroundColor: 'rgba(26, 26, 46, 0.4)',
+    // @ts-ignore - web-only CSS properties
+    backdropFilter: 'blur(20px) saturate(180%)',
+    WebkitBackdropFilter: 'blur(20px) saturate(180%)',
   },
   mainTabsContent: {
     flex: 1,

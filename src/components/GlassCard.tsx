@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, ViewStyle, Pressable, StyleProp } from 'react-native';
+import { View, StyleSheet, ViewStyle, Pressable, StyleProp, Platform } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, SIZES } from '../constants/theme';
@@ -64,7 +64,13 @@ export const GlassCard: React.FC<GlassCardProps> = ({
       {...pressProps}
     >
       <View style={styles.shadowContainer}>
-        <BlurView intensity={intensity} tint="dark" style={StyleSheet.absoluteFill} />
+        {Platform.OS === 'web' ? (
+          // Use CSS backdrop-filter for web
+          <View style={[StyleSheet.absoluteFill, styles.webBlur]} />
+        ) : (
+          // Use BlurView for native platforms
+          <BlurView intensity={intensity} tint="dark" style={StyleSheet.absoluteFill} />
+        )}
         <LinearGradient
           colors={['rgba(255,255,255,0.1)', 'rgba(255,255,255,0.02)']}
           start={{ x: 0, y: 0 }}
@@ -83,7 +89,7 @@ const styles = StyleSheet.create({
   containerWrapper: {
     borderRadius: SIZES.radius,
     overflow: 'hidden',
-    backgroundColor: COLORS.cardBackground,
+    backgroundColor: Platform.OS === 'web' ? 'rgba(26, 26, 46, 0.7)' : COLORS.cardBackground,
     shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.15,
@@ -94,6 +100,12 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: SIZES.radius,
     overflow: 'hidden',
+  },
+  webBlur: {
+    backgroundColor: 'rgba(26, 26, 46, 0.4)',
+    // @ts-ignore - web-only CSS properties
+    backdropFilter: 'blur(20px) saturate(180%)',
+    WebkitBackdropFilter: 'blur(20px) saturate(180%)',
   },
   gradientBorder: {
     ...StyleSheet.absoluteFillObject,

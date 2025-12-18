@@ -23,7 +23,9 @@ export const OnboardingScreen = () => {
   const [goal, setGoal] = useState(3);
 
   const handleNext = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
     if (step === 1 && name.trim().length > 0) {
       setStep(2);
     } else if (step === 2) {
@@ -32,7 +34,9 @@ export const OnboardingScreen = () => {
   };
 
   const handleFinish = async () => {
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
     await updateUser({
       name: name.trim(),
       dailyGoal: goal,
@@ -82,7 +86,9 @@ export const OnboardingScreen = () => {
               <TouchableOpacity 
                 style={styles.goalButton}
                 onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
                   setGoal(Math.max(1, goal - 1));
                 }}
               >
@@ -94,7 +100,9 @@ export const OnboardingScreen = () => {
               <TouchableOpacity 
                 style={styles.goalButton}
                 onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
                   setGoal(Math.min(10, goal + 1));
                 }}
               >
