@@ -11,6 +11,7 @@ import {
   Modal,
   ActivityIndicator
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, FONTS, SPACING, SIZES } from '../constants/theme';
@@ -34,6 +35,7 @@ const COMMON_EXERCISES = [
 
 export const AddWorkoutScreen = ({ navigation }: any) => {
   const { addWorkout } = useWorkouts();
+  const insets = useSafeAreaInsets();
   
   const [exerciseName, setExerciseName] = useState('');
   const [exerciseType, setExerciseType] = useState<ExerciseType>('strength');
@@ -237,7 +239,7 @@ export const AddWorkoutScreen = ({ navigation }: any) => {
 
         </ScrollView>
 
-        <View style={styles.footer}>
+        <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom + 80, 100) }]}>
           <TouchableOpacity 
             style={[styles.saveButtonContainer, !exerciseName && { opacity: 0.5 }]}
             onPress={handleSave}
@@ -385,7 +387,7 @@ const styles = StyleSheet.create({
   },
   footer: {
     padding: SPACING.l,
-    paddingBottom: 100, // Clear the floating tab bar
+    // paddingBottom set dynamically with safe area insets
   },
   saveButtonContainer: {
     borderRadius: 16,
