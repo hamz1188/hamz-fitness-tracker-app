@@ -1,5 +1,5 @@
 import React, { useMemo, useCallback, useState } from 'react';
-import { Text, StyleSheet, View, SectionList, TouchableOpacity, TextInput, Animated } from 'react-native';
+import { Text, StyleSheet, View, SectionList, TouchableOpacity, TextInput, Animated, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { format, isToday, isYesterday, parseISO } from 'date-fns';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
@@ -93,32 +93,49 @@ export const HistoryScreen = () => {
   };
 
   const renderWorkout = ({ item }: { item: Workout }) => {
+    const workoutCard = (
+      <GlassCard style={styles.workoutItem}>
+        <View style={styles.row}>
+          <View style={[styles.workoutIcon, { backgroundColor: item.exerciseType === 'cardio' ? `${COLORS.warning}20` : `${COLORS.primary}20` }]}>
+            <Ionicons
+              name={item.exerciseType === 'cardio' ? 'bicycle' : 'barbell'}
+              size={24}
+              color={item.exerciseType === 'cardio' ? COLORS.warning : COLORS.primary}
+            />
+          </View>
+          <View style={styles.workoutInfo}>
+            <Text style={styles.workoutTitle}>{item.exerciseName}</Text>
+            <Text style={styles.workoutDetails}>
+              {item.exerciseType === 'strength' 
+                ? `${item.sets} sets • ${item.reps} reps • ${item.weight}kg`
+                : `${item.distance} km • ${item.duration} min`}
+            </Text>
+          </View>
+          {Platform.OS === 'web' && (
+            <TouchableOpacity
+              onPress={() => deleteWorkout(item.id)}
+              style={styles.webDeleteButton}
+            >
+              <Ionicons name="trash" size={20} color={COLORS.error} />
+            </TouchableOpacity>
+          )}
+          <Text style={styles.workoutTime}>
+            {format(parseISO(item.timestamp as string), 'h:mm a')}
+          </Text>
+        </View>
+      </GlassCard>
+    );
+
+    // On web, don't use Swipeable
+    if (Platform.OS === 'web') {
+      return workoutCard;
+    }
+
     return (
       <Swipeable
         renderRightActions={(progress, dragX) => renderRightActions(progress, dragX, item.id)}
       >
-        <GlassCard style={styles.workoutItem}>
-          <View style={styles.row}>
-            <View style={[styles.workoutIcon, { backgroundColor: item.exerciseType === 'cardio' ? `${COLORS.warning}20` : `${COLORS.primary}20` }]}>
-              <Ionicons
-                name={item.exerciseType === 'cardio' ? 'bicycle' : 'barbell'}
-                size={24}
-                color={item.exerciseType === 'cardio' ? COLORS.warning : COLORS.primary}
-              />
-            </View>
-            <View style={styles.workoutInfo}>
-              <Text style={styles.workoutTitle}>{item.exerciseName}</Text>
-              <Text style={styles.workoutDetails}>
-                {item.exerciseType === 'strength' 
-                  ? `${item.sets} sets • ${item.reps} reps • ${item.weight}kg`
-                  : `${item.distance} km • ${item.duration} min`}
-              </Text>
-            </View>
-            <Text style={styles.workoutTime}>
-              {format(parseISO(item.timestamp as string), 'h:mm a')}
-            </Text>
-          </View>
-        </GlassCard>
+        {workoutCard}
       </Swipeable>
     );
   };
@@ -301,6 +318,15 @@ const styles = StyleSheet.create({
   workoutTime: {
     ...FONTS.caption2,
     color: COLORS.textTertiary,
+  },
+  webDeleteButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
   },
   deleteButtonContainer: {
     width: 80,

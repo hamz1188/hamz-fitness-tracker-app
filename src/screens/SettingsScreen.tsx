@@ -5,7 +5,8 @@ import {
   StyleSheet, 
   TouchableOpacity, 
   Alert, 
-  ScrollView 
+  ScrollView,
+  Platform 
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ScreenWrapper } from '../components/ScreenWrapper';
@@ -20,7 +21,9 @@ export const SettingsScreen = ({ navigation }: any) => {
   const { clearWorkouts } = useWorkouts();
 
   const handleResetData = () => {
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+    }
     Alert.alert(
       "Reset All Data",
       "Are you sure? This will delete all your workouts and profile data. This action cannot be undone.",

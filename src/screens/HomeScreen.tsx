@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { format, isSameDay, parseISO } from 'date-fns';
 import { useFocusEffect } from '@react-navigation/native';
@@ -56,30 +56,47 @@ const WorkoutItem = ({ item, onDelete }: { item: Workout; onDelete: (id: string)
     );
   };
 
-  return (
-    <Swipeable renderRightActions={renderRightActions}>
-      <GlassCard style={styles.workoutItem}>
-        <View style={styles.row}>
-          <View style={[styles.workoutIcon, { backgroundColor: item.exerciseType === 'cardio' ? `${COLORS.warning}20` : `${COLORS.primary}20` }]}>
-            <Ionicons
-              name={item.exerciseType === 'cardio' ? 'bicycle' : 'barbell'}
-              size={24}
-              color={item.exerciseType === 'cardio' ? COLORS.warning : COLORS.primary}
-            />
-          </View>
-          <View style={styles.workoutInfo}>
-            <Text style={styles.workoutTitle}>{item.exerciseName}</Text>
-            <Text style={styles.workoutDetails}>
-              {item.exerciseType === 'strength' 
-                ? `${item.sets} sets • ${item.reps} reps`
-                : `${item.distance} km • ${item.duration} min`}
-            </Text>
-          </View>
-          <Text style={styles.workoutTime}>
-            {format(parseISO(item.timestamp as string), 'h:mm a')}
+  const workoutCard = (
+    <GlassCard style={styles.workoutItem}>
+      <View style={styles.row}>
+        <View style={[styles.workoutIcon, { backgroundColor: item.exerciseType === 'cardio' ? `${COLORS.warning}20` : `${COLORS.primary}20` }]}>
+          <Ionicons
+            name={item.exerciseType === 'cardio' ? 'bicycle' : 'barbell'}
+            size={24}
+            color={item.exerciseType === 'cardio' ? COLORS.warning : COLORS.primary}
+          />
+        </View>
+        <View style={styles.workoutInfo}>
+          <Text style={styles.workoutTitle}>{item.exerciseName}</Text>
+          <Text style={styles.workoutDetails}>
+            {item.exerciseType === 'strength' 
+              ? `${item.sets} sets • ${item.reps} reps`
+              : `${item.distance} km • ${item.duration} min`}
           </Text>
         </View>
-      </GlassCard>
+        {Platform.OS === 'web' && (
+          <TouchableOpacity
+            onPress={() => onDelete(item.id)}
+            style={styles.webDeleteButton}
+          >
+            <Ionicons name="trash" size={20} color={COLORS.error} />
+          </TouchableOpacity>
+        )}
+        <Text style={styles.workoutTime}>
+          {format(parseISO(item.timestamp as string), 'h:mm a')}
+        </Text>
+      </View>
+    </GlassCard>
+  );
+
+  // On web, don't use Swipeable
+  if (Platform.OS === 'web') {
+    return workoutCard;
+  }
+
+  return (
+    <Swipeable renderRightActions={renderRightActions}>
+      {workoutCard}
     </Swipeable>
   );
 };
@@ -320,6 +337,15 @@ const styles = StyleSheet.create({
   workoutTime: {
     ...FONTS.caption1,
     color: COLORS.textTertiary,
+  },
+  webDeleteButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
   },
   deleteButtonContainer: {
     width: 80,
